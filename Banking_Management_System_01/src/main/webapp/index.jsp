@@ -106,9 +106,6 @@
                 <li class="nav-item">
                     <a class="nav-link text-white fw-semibold" href="#modules"><i class="bi bi-layers"></i> Modules</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white fw-semibold" href="#directory"><i class="bi bi-compass"></i> All URLs</a>
-                </li>
             </ul>
 
             <!-- Auth Quick Actions -->
@@ -131,11 +128,11 @@
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
-                    <i class="bi bi-check-circle-fill"></i> JSP &bull; Servlet &bull; JDBC &bull; MySQL
+                    <i class="bi bi-shield-lock-fill"></i> Secure Digital Banking
                 </span>
                 <h1>Internet Banking Portal</h1>
                 <p class="mt-3">
-                    A clean, modular e-banking system built with raw Java Servlets, JSP views, JDBC SQL statements, and MySQL storage.
+                    Experience seamless, secure, and smart internet banking. Access your accounts, view real-time balances, and manage your banking profile with ease.
                 </p>
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <a href="user/login.jsp" class="btn btn-warning btn-lg fw-bold px-4 shadow">
@@ -155,25 +152,11 @@
         </div>
     </div>
 
-    <!-- Active Architecture Status -->
-    <div class="card border-0 shadow-sm mb-5 bg-white p-4 rounded-3">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div>
-                <h5 class="mb-1 text-primary fw-bold"><i class="bi bi-cpu-fill"></i> Application Architecture</h5>
-                <p class="text-muted mb-0">Pattern: <code>Browser &rarr; JSP &rarr; Servlet (JDBC) &rarr; MySQL Database</code></p>
-            </div>
-            <div class="d-flex gap-2">
-                <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-check-lg"></i> MySQL `ebanking`</span>
-                <span class="badge bg-primary px-3 py-2 fs-6"><i class="bi bi-lock-fill"></i> Session Protected</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Active Modules -->
     <div id="modules" class="mb-5">
         <div class="mb-4">
-            <h2 class="fw-bold text-primary mb-1">Active System Modules</h2>
-            <p class="text-muted">Currently implemented and functional modules in the project</p>
+            <h2 class="fw-bold text-primary mb-1">Banking Services</h2>
+            <p class="text-muted">Explore our digital banking features</p>
         </div>
 
         <div class="row g-4">
@@ -236,119 +219,13 @@
         </div>
     </div>
 
-    <!-- Complete Site Map / Direct URL Directory -->
-    <div id="directory" class="card border-0 shadow-sm p-4 rounded-3 mb-5">
-        <h3 class="fw-bold text-primary mb-2"><i class="bi bi-compass"></i> Application URL Directory</h3>
-        <p class="text-muted mb-4">Direct links to all implemented JSP pages and Servlet endpoints:</p>
-
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Feature</th>
-                        <th>URL / Endpoint</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Home Page</strong></td>
-                        <td><code>index.jsp</code></td>
-                        <td><span class="badge bg-info text-dark">JSP</span></td>
-                        <td>Main application home landing page</td>
-                        <td><a href="index.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>User Registration</strong></td>
-                        <td><code>user/register.jsp</code></td>
-                        <td><span class="badge bg-info text-dark">JSP</span></td>
-                        <td>Form to create a new bank customer</td>
-                        <td><a href="user/register.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Register Servlet</strong></td>
-                        <td><code>/user/register</code></td>
-                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
-                        <td>Direct JDBC INSERT to <code>ebanking.users</code></td>
-                        <td><a href="user/register.jsp" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>User Login</strong></td>
-                        <td><code>user/login.jsp</code></td>
-                        <td><span class="badge bg-info text-dark">JSP</span></td>
-                        <td>Customer login screen</td>
-                        <td><a href="user/login.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Login Servlet</strong></td>
-                        <td><code>/user/login</code></td>
-                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
-                        <td>Verifies credentials & sets session</td>
-                        <td><a href="user/login.jsp" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Customer Dashboard</strong></td>
-                        <td><code>user/dashboard.jsp</code></td>
-                        <td><span class="badge bg-info text-dark">JSP</span></td>
-                        <td>Session-protected user dashboard</td>
-                        <td><a href="user/dashboard.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>View Profile</strong></td>
-                        <td><code>/user/profile</code></td>
-                        <td><span class="badge bg-primary">Servlet (GET)</span></td>
-                        <td>Fetches user details via JDBC and displays profile.jsp</td>
-                        <td><a href="${pageContext.request.contextPath}/user/profile" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Edit Profile Form</strong></td>
-                        <td><code>user/edit-profile.jsp</code></td>
-                        <td><span class="badge bg-info text-dark">JSP</span></td>
-                        <td>Form to update customer contact details</td>
-                        <td><a href="${pageContext.request.contextPath}/user/update-profile" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Update Profile Servlet</strong></td>
-                        <td><code>/user/update-profile</code></td>
-                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
-                        <td>Executes JDBC UPDATE and refreshes session</td>
-                        <td><a href="${pageContext.request.contextPath}/user/update-profile" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>My Accounts</strong></td>
-                        <td><code>/account/list</code></td>
-                        <td><span class="badge bg-primary">Servlet (GET)</span></td>
-                        <td>Lists all bank accounts and total balance for the user</td>
-                        <td><a href="${pageContext.request.contextPath}/account/list" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Open New Account</strong></td>
-                        <td><code>/account/create</code></td>
-                        <td><span class="badge bg-primary">Servlet (GET/POST)</span></td>
-                        <td>Opens Savings/Current account with initial deposit</td>
-                        <td><a href="${pageContext.request.contextPath}/account/create" class="btn btn-sm btn-outline-primary">Open</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>User Logout</strong></td>
-                        <td><code>/user/logout</code></td>
-                        <td><span class="badge bg-danger">Servlet (GET)</span></td>
-                        <td>Invalidates user session and redirects to login</td>
-                        <td><a href="${pageContext.request.contextPath}/user/logout" class="btn btn-sm btn-outline-danger">Logout</a></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
 </div>
 
 <!-- Footer -->
 <footer class="bg-dark text-white py-4 mt-5">
     <div class="container text-center">
         <h5 class="fw-bold mb-2">E-Banking Management System</h5>
-        <p class="text-white-50 mb-3">Academic College Project &bull; Raw JSP + Servlet + JDBC + MySQL Architecture</p>
+        <p class="text-white-50 mb-3">Safe &bull; Secure &bull; Reliable Digital Banking</p>
         <div class="d-flex justify-content-center gap-3">
             <a href="index.jsp" class="text-white-50 text-decoration-none">Home</a>
             <span class="text-white-50">&bull;</span>
