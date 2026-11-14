@@ -210,11 +210,11 @@ id="menu">
 </li>
 
 <li class="nav-item">
-<a class="nav-link" href="login.jsp">Login</a>
+<a class="nav-link" href="user/login.jsp">Login</a>
 </li>
 
 <li class="nav-item">
-<a class="nav-link" href="register.jsp">Register</a>
+<a class="nav-link" href="user/register.jsp">Register</a>
 </li>
 
 <li class="nav-item">
@@ -271,7 +271,7 @@ Secure • Smart • Digital Banking Experience
 
 <div class="mt-4">
 
-<a href="login.jsp"
+<a href="user/login.jsp"
 class="btn btn-warning btn-bank">
 
 <i class="bi bi-box-arrow-in-right"></i>
@@ -280,7 +280,7 @@ Login
 
 </a>
 
-<a href="register.jsp"
+<a href="user/register.jsp"
 class="btn btn-light btn-bank">
 
 <i class="bi bi-person-plus-fill"></i>
@@ -1308,9 +1308,9 @@ Quick Links
 
 <li><a href="index.jsp" class="text-white text-decoration-none">Home</a></li>
 
-<li><a href="login.jsp" class="text-white text-decoration-none">Login</a></li>
+<li><a href="user/login.jsp" class="text-white text-decoration-none">Login</a></li>
 
-<li><a href="register.jsp" class="text-white text-decoration-none">Register</a></li>
+<li><a href="user/register.jsp" class="text-white text-decoration-none">Register</a></li>
 
 <li><a href="contact.jsp" class="text-white text-decoration-none">Contact</a></li>
 

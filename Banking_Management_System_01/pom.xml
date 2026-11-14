@@ -3,6 +3,7 @@
   <groupId>Banking_Management_System_01</groupId>
   <artifactId>Banking_Management_System_01</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
   
   <dependencies>
   <dependency>
@@ -92,12 +93,20 @@
   
   </dependencies>
   <build>
+    <finalName>banking</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <release>25</release>
+          <release>21</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
       </plugin>
     </plugins>

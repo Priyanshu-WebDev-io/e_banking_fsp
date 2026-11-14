@@ -6,11 +6,11 @@ import java.sql.DriverManager;
 public class DBUtil {
 
     private static final String URL =
-            "jdbc:mysql://localhost:3306/banking_db";
+            "jdbc:mysql://localhost:3306/ebanking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
     private static final String USER = "root";
 
-    private static final String PASSWORD = "Kanhu@4189";
+    private static final String PASSWORD = "root";
 
     public static Connection getConnection()
             throws Exception {

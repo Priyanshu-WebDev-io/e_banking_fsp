@@ -17,30 +17,31 @@ public class AuditFilter implements Filter {
             FilterChain chain)
             throws IOException, ServletException {
 
-        HttpServletRequest req =
-                (HttpServletRequest) request;
+        HttpServletRequest req = (HttpServletRequest) request;
+        String url = req.getRequestURI();
 
-        String url =
-                req.getRequestURI();
-
-        if(url.contains("login")
+        // Do not intercept user module or static files with legacy Hibernate audit
+        if (!url.contains("/user/") && (url.contains("login")
                 || url.contains("transaction")
                 || url.contains("loan")
-                || url.contains("customer")) {
+                || url.contains("customer"))) {
 
-            new AuditLogService()
-                    .logActivity(
-                            1,
-                            "SYSTEM",
-                            "ADMIN",
-                            "ACCESS",
-                            url,
-                            req.getRemoteAddr(),
-                            "SUCCESS");
+            try {
+                new AuditLogService()
+                        .logActivity(
+                                1,
+                                "SYSTEM",
+                                "ADMIN",
+                                "ACCESS",
+                                url,
+                                req.getRemoteAddr(),
+                                "SUCCESS");
+            } catch (Throwable t) {
+                // Safeguard: never let audit logging failures cause a 500 error for the user
+                System.err.println("[AuditFilter Warning] Could not record audit log: " + t.getMessage());
+            }
         }
 
-        chain.doFilter(
-                request,
-                response);
+        chain.doFilter(request, response);
     }
 }
