@@ -6,25 +6,45 @@
         return;
     }
 
-    // Helper to get from request attribute first, then fallback to session attribute
-    java.util.function.BiFunction<String, String, String> getVal = (reqKey, sessKey) -> {
-        Object val = request.getAttribute(reqKey);
-        if (val == null) {
-            val = session.getAttribute(sessKey);
-        }
-        return val != null ? val.toString() : "-";
-    };
+    String firstName = (String) request.getAttribute("firstName");
+    if (firstName == null) firstName = (String) session.getAttribute("firstName");
+    if (firstName == null) firstName = "-";
 
-    String firstName = getVal.apply("firstName", "firstName");
-    String lastName = getVal.apply("lastName", "lastName");
-    String email = getVal.apply("email", "email");
-    String phone = getVal.apply("phone", "phone");
-    String dateOfBirth = getVal.apply("dateOfBirth", "dateOfBirth");
-    String address = getVal.apply("address", "address");
-    String city = getVal.apply("city", "city");
-    String state = getVal.apply("state", "state");
-    String pincode = getVal.apply("pincode", "pincode");
-    String status = getVal.apply("status", "status");
+    String lastName = (String) request.getAttribute("lastName");
+    if (lastName == null) lastName = (String) session.getAttribute("lastName");
+    if (lastName == null) lastName = "-";
+
+    String email = (String) request.getAttribute("email");
+    if (email == null) email = (String) session.getAttribute("email");
+    if (email == null) email = "-";
+
+    String phone = (String) request.getAttribute("phone");
+    if (phone == null) phone = (String) session.getAttribute("phone");
+    if (phone == null) phone = "-";
+
+    String dateOfBirth = (String) request.getAttribute("dateOfBirth");
+    if (dateOfBirth == null) dateOfBirth = (String) session.getAttribute("dateOfBirth");
+    if (dateOfBirth == null) dateOfBirth = "-";
+
+    String address = (String) request.getAttribute("address");
+    if (address == null) address = (String) session.getAttribute("address");
+    if (address == null) address = "-";
+
+    String city = (String) request.getAttribute("city");
+    if (city == null) city = (String) session.getAttribute("city");
+    if (city == null) city = "-";
+
+    String state = (String) request.getAttribute("state");
+    if (state == null) state = (String) session.getAttribute("state");
+    if (state == null) state = "-";
+
+    String pincode = (String) request.getAttribute("pincode");
+    if (pincode == null) pincode = (String) session.getAttribute("pincode");
+    if (pincode == null) pincode = "-";
+
+    String status = (String) request.getAttribute("status");
+    if (status == null) status = (String) session.getAttribute("status");
+    if (status == null) status = "ACTIVE";
 %>
 <!DOCTYPE html>
 <html lang="en">
