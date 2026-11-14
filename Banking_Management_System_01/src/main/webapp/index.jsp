@@ -1,1571 +1,452 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>E-Banking Management System</title>
 
-<title>Enterprise Banking Management System</title>
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-<style>
-
-body{
-    background:#f5f7fb;
-    font-family:'Segoe UI',sans-serif;
-}
-
-/* Navbar */
-
-.navbar{
-    background:#0d47a1;
-}
-
-.navbar-brand{
-    font-weight:bold;
-    font-size:25px;
-}
-
-.nav-link{
-    color:white!important;
-    margin-left:10px;
-}
-
-.nav-link:hover{
-    color:#ffd54f!important;
-}
-
-/* Hero */
-
-.hero{
-    background:linear-gradient(rgba(0,40,80,.75),rgba(0,40,80,.75)),
-    url("https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1800&auto=format&fit=crop");
-    background-size:cover;
-    background-position:center;
-    color:white;
-    padding:120px 20px;
-}
-
-.hero h1{
-    font-size:55px;
-    font-weight:bold;
-}
-
-.hero p{
-    font-size:20px;
-}
-
-.btn-bank{
-    padding:12px 28px;
-    border-radius:30px;
-}
-
-/* Cards */
-
-.card{
-    border:none;
-    border-radius:15px;
-    transition:.4s;
-}
-
-.card:hover{
-    transform:translateY(-8px);
-    box-shadow:0px 15px 35px rgba(0,0,0,.15);
-}
-
-.counter{
-    font-size:35px;
-    font-weight:bold;
-}
-
-/* Service */
-
-.service-icon{
-    font-size:45px;
-    color:#0d6efd;
-}
-
-.section-title{
-    font-weight:bold;
-    color:#0d47a1;
-}
-/* Scroll Button */
-
-#topBtn{
-
-position:fixed;
-
-right:20px;
-
-bottom:20px;
-
-display:none;
-
-border-radius:50%;
-
-width:55px;
-
-height:55px;
-
-z-index:999;
-
-}
-
-/* Dark Theme */
-
-.dark-mode{
-
-background:#121212!important;
-
-color:white!important;
-
-}
-
-.dark-mode .card{
-
-background:#1f1f1f;
-
-color:white;
-
-}
-
-.dark-mode .navbar{
-
-background:#000!important;
-
-}
-
-.dark-mode footer{
-
-background:#000!important;
-
-}
-
-.card{
-
-transition:0.4s;
-
-}
-
-.card:hover{
-
-transform:translateY(-10px);
-
-}
-
-.counter{
-
-transition:1s;
-
-font-size:35px;
-
-font-weight:bold;
-
-}
-
-</style>
-
+    <style>
+        .hero-banner {
+            background: linear-gradient(135deg, #0d47a1 0%, #1565c0 60%, #1976d2 100%);
+            color: #ffffff;
+            padding: 80px 20px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(13, 71, 161, 0.2);
+        }
+        .hero-banner h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .hero-banner p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 700px;
+        }
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 28px;
+            height: 100%;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+            border-color: #0d47a1;
+        }
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 18px;
+        }
+        .nav-pill-custom {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .table-custom th {
+            background-color: #0d47a1;
+            color: white;
+        }
+    </style>
 </head>
-<body>
+<body style="background-color: #f8fafc;">
 
-<!-- Navbar -->
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm" style="background-color: #0d47a1 !important;">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2" href="index.jsp">
+            <i class="bi bi-bank2 fs-3 text-warning"></i> E-Banking System
+        </a>
 
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<div class="container">
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                <li class="nav-item">
+                    <a class="nav-link active fw-semibold" href="index.jsp"><i class="bi bi-house-door"></i> Home</a>
+                </li>
 
-<a class="navbar-brand" href="index.jsp">
+                <!-- User Portal Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> User Portal
+                    </a>
+                    <ul class="dropdown-menu shadow">
+                        <li><a class="dropdown-item" href="user/login.jsp"><i class="bi bi-box-arrow-in-right text-primary me-2"></i> User Login</a></li>
+                        <li><a class="dropdown-item" href="user/register.jsp"><i class="bi bi-person-plus text-success me-2"></i> Register New User</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="user/dashboard.jsp"><i class="bi bi-speedometer2 text-info me-2"></i> User Dashboard</a></li>
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/user/profile"><i class="bi bi-person-vcard text-secondary me-2"></i> View Profile</a></li>
+                    </ul>
+                </li>
 
-🏦 MyBank
+                <!-- Banking Services -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-grid-fill"></i> Banking Services
+                    </a>
+                    <ul class="dropdown-menu shadow">
+                        <li><a class="dropdown-item" href="user/accounts.jsp"><i class="bi bi-wallet2 text-primary me-2"></i> My Accounts</a></li>
+                        <li><a class="dropdown-item" href="user/transactions.jsp"><i class="bi bi-arrow-left-right text-success me-2"></i> Transactions & Transfers</a></li>
+                        <li><a class="dropdown-item" href="user/loans.jsp"><i class="bi bi-file-earmark-text text-warning me-2"></i> Loan Applications</a></li>
+                        <li><a class="dropdown-item" href="user/cards.jsp"><i class="bi bi-credit-card text-danger me-2"></i> Debit & Credit Cards</a></li>
+                    </ul>
+                </li>
 
-</a>
+                <li class="nav-item">
+                    <a class="nav-link text-white fw-semibold" href="#modules"><i class="bi bi-layers"></i> Modules</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white fw-semibold" href="#sitemap"><i class="bi bi-compass"></i> Site Map</a>
+                </li>
+            </ul>
 
-<button class="navbar-toggler"
-type="button"
-data-bs-toggle="collapse"
-data-bs-target="#menu">
-
-<span class="navbar-toggler-icon"></span>
-
-</button>
-
-<div class="collapse navbar-collapse"
-id="menu">
-
-<ul class="navbar-nav ms-auto">
-
-<li class="nav-item">
-<a class="nav-link" href="index.jsp">Home</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="#services">Services</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="#statistics">Statistics</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="user/login.jsp">Login</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="user/register.jsp">Register</a>
-</li>
-
-<li class="nav-item">
-
-<a class="nav-link">
-
-<i class="bi bi-bell-fill"></i>
-
-</a>
-
-</li>
-
-</ul>
-
-<form class="d-flex ms-3">
-
-<input
-class="form-control me-2"
-type="search"
-placeholder="Search">
-
-<button
-class="btn btn-warning">
-
-Search
-
-</button>
-
-</form>
-
-</div>
-
-</div>
-
+            <!-- Auth Buttons -->
+            <div class="d-flex gap-2">
+                <a href="user/login.jsp" class="btn btn-warning fw-bold px-3 shadow-sm">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+                <a href="user/register.jsp" class="btn btn-light fw-bold px-3 shadow-sm">
+                    <i class="bi bi-person-plus-fill text-primary"></i> Register
+                </a>
+            </div>
+        </div>
+    </div>
 </nav>
 
-<!-- Hero -->
-
-<section class="hero text-center">
-
-<div class="container">
-
-<h1>
-
-Enterprise Banking Management System
-
-</h1>
-
-<p>
-
-Secure • Smart • Digital Banking Experience
-
-</p>
-
-<div class="mt-4">
-
-<a href="user/login.jsp"
-class="btn btn-warning btn-bank">
-
-<i class="bi bi-box-arrow-in-right"></i>
-
-Login
-
-</a>
-
-<a href="user/register.jsp"
-class="btn btn-light btn-bank">
-
-<i class="bi bi-person-plus-fill"></i>
-
-Open Account
-
-</a>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- Statistics -->
-
-<section class="container mt-5"
-id="statistics">
-
-<h2 class="text-center section-title mb-4">
-
-Bank Statistics
-
-</h2>
-
-<div class="row g-4">
-
-<div class="col-lg-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-people-fill text-primary fs-1"></i>
-
-<h5>Total Customers</h5>
-
-<div class="counter">12,548</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-lg-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-bank text-success fs-1"></i>
-
-<h5>Accounts</h5>
-
-<div class="counter">8,420</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-lg-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-cash-stack text-danger fs-1"></i>
-
-<h5>Loans</h5>
-
-<div class="counter">1,258</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-lg-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-currency-rupee text-warning fs-1"></i>
-
-<h5>Transactions</h5>
-
-<div class="counter">58K</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- Services -->
-
-<section class="container mt-5"
-id="services">
-
-<h2 class="text-center section-title mb-5">
-
-Quick Banking Services
-
-</h2>
-
-<div class="row g-4">
-
-<div class="col-md-3">
-
-<a href="create-account.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-person-plus-fill service-icon"></i>
-
-<h5 class="mt-3">
-
-Open Account
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="deposit.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-wallet2 service-icon"></i>
-
-<h5 class="mt-3">
-
-Deposit
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="withdraw.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-cash service-icon"></i>
-
-<h5 class="mt-3">
-
-Withdraw
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="transfer.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-arrow-left-right service-icon"></i>
-
-<h5 class="mt-3">
-
-Transfer
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="apply-loan.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-house-door-fill service-icon"></i>
-
-<h5 class="mt-3">
-
-Apply Loan
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="credit-card-apply.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-credit-card-fill service-icon"></i>
-
-<h5 class="mt-3">
-
-Credit Card
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="statement.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-file-earmark-text-fill service-icon"></i>
-
-<h5 class="mt-3">
-
-Statements
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="col-md-3">
-
-<a href="notification-center.jsp"
-class="text-decoration-none">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-bell-fill service-icon"></i>
-
-<h5 class="mt-3">
-
-Notifications
-
-</h5>
-
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-</div>
-
-</section>
-<!-- ===================== ADMIN PORTAL ===================== -->
-
-<section class="container mt-5">
-
-    <h2 class="text-center section-title mb-4">
-
-        <i class="bi bi-speedometer2"></i> Admin Portal
-
-    </h2>
-
-    <div class="row g-4">
-
-        <div class="col-md-3">
-            <a href="admin-dashboard.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-display fs-1 text-primary"></i>
-                        <h5 class="mt-3">Dashboard</h5>
-                    </div>
+<div class="container py-4">
+
+    <!-- Hero Section -->
+    <div class="hero-banner">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
+                    <i class="bi bi-check-circle-fill"></i> College Project • JSP + Servlet + JDBC + MySQL
+                </span>
+                <h1>Enterprise Banking Portal</h1>
+                <p class="mt-3">
+                    A complete, lightweight, modular banking management system built with raw Java Servlets, JSP views, JDBC database queries, and MySQL storage.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a href="user/login.jsp" class="btn btn-warning btn-lg fw-bold px-4 shadow">
+                        <i class="bi bi-box-arrow-in-right"></i> Customer Login
+                    </a>
+                    <a href="user/register.jsp" class="btn btn-light btn-lg fw-bold px-4 text-primary shadow">
+                        <i class="bi bi-person-plus"></i> Create Account
+                    </a>
+                    <a href="user/dashboard.jsp" class="btn btn-outline-light btn-lg fw-semibold px-4">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
                 </div>
-            </a>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <i class="bi bi-shield-check" style="font-size: 9rem; opacity: 0.85;"></i>
+            </div>
         </div>
-
-        <div class="col-md-3">
-            <a href="employee-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-person-workspace fs-1 text-success"></i>
-                        <h5 class="mt-3">Employees</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="customer-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-people-fill fs-1 text-warning"></i>
-                        <h5 class="mt-3">Customers</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="branch-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-bank fs-1 text-danger"></i>
-                        <h5 class="mt-3">Branches</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="analytics-dashboard.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-bar-chart-fill fs-1 text-info"></i>
-                        <h5 class="mt-3">Analytics</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="reports.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-file-earmark-bar-graph-fill fs-1 text-secondary"></i>
-                        <h5 class="mt-3">Reports</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="audit-logs.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-journal-text fs-1 text-dark"></i>
-                        <h5 class="mt-3">Audit Logs</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="loan-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-cash-stack fs-1 text-success"></i>
-                        <h5 class="mt-3">Loan Requests</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
     </div>
 
-</section>
-
-<!-- ================= CUSTOMER PORTAL ================= -->
-
-<section class="container mt-5">
-
-    <h2 class="text-center section-title mb-4">
-
-        <i class="bi bi-person-circle"></i> Customer Portal
-
-    </h2>
-
-    <div class="row g-4">
-
-        <div class="col-md-3">
-            <a href="customer-dashboard.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-house-door-fill fs-1 text-primary"></i>
-                        <h5 class="mt-3">Dashboard</h5>
-                    </div>
-                </div>
-            </a>
+    <!-- Quick Status Alert -->
+    <div class="card border-0 shadow-sm mb-5 bg-white p-4 rounded-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h5 class="mb-1 text-primary fw-bold"><i class="bi bi-database-check"></i> System Architecture Status</h5>
+                <p class="text-muted mb-0">Active Pattern: <code>JSP &rarr; Servlet &rarr; JDBC &rarr; MySQL</code> (No Hibernate / No Spring dependency)</p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-check2"></i> MySQL Connected</span>
+                <span class="badge bg-primary px-3 py-2 fs-6"><i class="bi bi-lock-fill"></i> Session Protected</span>
+            </div>
         </div>
-
-        <div class="col-md-3">
-            <a href="transaction-history.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-clock-history fs-1 text-success"></i>
-                        <h5 class="mt-3">Transactions</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="statement.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-file-earmark-pdf-fill fs-1 text-danger"></i>
-                        <h5 class="mt-3">Statements</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="beneficiary-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-person-hearts fs-1 text-warning"></i>
-                        <h5 class="mt-3">Beneficiaries</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="nominee-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-person-vcard-fill fs-1 text-info"></i>
-                        <h5 class="mt-3">Nominees</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="notification-center.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-bell-fill fs-1 text-primary"></i>
-                        <h5 class="mt-3">Notifications</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="raise-ticket.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-headset fs-1 text-danger"></i>
-                        <h5 class="mt-3">Support</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="transfer.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-arrow-left-right fs-1 text-success"></i>
-                        <h5 class="mt-3">Fund Transfer</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
-
     </div>
 
-</section>
-
-<!-- ================= EMPLOYEE PORTAL ================= -->
-
-<section class="container mt-5">
-
-    <h2 class="text-center section-title mb-4">
-
-        <i class="bi bi-person-badge-fill"></i> Employee Portal
-
-    </h2>
-
-    <div class="row g-4">
-
-        <div class="col-md-3">
-            <a href="employee-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-person-lines-fill fs-1 text-success"></i>
-                        <h5 class="mt-3">Employees</h5>
-                    </div>
-                </div>
-            </a>
+    <!-- Banking Modules Section -->
+    <div id="modules" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="fw-bold text-primary mb-1">Banking System Modules</h2>
+                <p class="text-muted">Browse and test all available functional modules</p>
+            </div>
         </div>
 
-        <div class="col-md-3">
-            <a href="customer-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-person-check-fill fs-1 text-primary"></i>
-                        <h5 class="mt-3">Verify Customer</h5>
+        <div class="row g-4">
+            <!-- 1. User Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="user/dashboard.jsp" class="feature-card">
+                    <div class="feature-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-person-circle"></i>
                     </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="loan-list.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-bank2 fs-1 text-warning"></i>
-                        <h5 class="mt-3">Loan Approval</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">User Module</h4>
+                        <span class="badge bg-success">Active</span>
                     </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="support-dashboard.jsp" class="text-decoration-none">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <i class="bi bi-life-preserver fs-1 text-danger"></i>
-                        <h5 class="mt-3">Support Dashboard</h5>
+                    <p class="text-muted flex-grow-1">
+                        Registration, Login authentication, Session management, Dashboard, and Profile view & update.
+                    </p>
+                    <div class="mt-3 text-primary fw-semibold d-flex align-items-center gap-1">
+                        Access User Portal <i class="bi bi-arrow-right"></i>
                     </div>
-                </div>
-            </a>
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= LOAN & CARD MODULE ================= -->
-
-<section class="container mt-5 mb-5">
-
-<h2 class="text-center section-title mb-4">
-
-<i class="bi bi-credit-card-2-front-fill"></i>
-
-Loans & Cards
-
-</h2>
-
-<div class="row g-4">
-
-<div class="col-md-3">
-<a href="apply-loan.jsp" class="text-decoration-none">
-<div class="card shadow text-center">
-<div class="card-body">
-<i class="bi bi-house-fill fs-1 text-primary"></i>
-<h5 class="mt-3">Apply Loan</h5>
-</div>
-</div>
-</a>
-</div>
-
-<div class="col-md-3">
-<a href="loan-list.jsp" class="text-decoration-none">
-<div class="card shadow text-center">
-<div class="card-body">
-<i class="bi bi-cash-stack fs-1 text-success"></i>
-<h5 class="mt-3">Loan List</h5>
-</div>
-</div>
-</a>
-</div>
-
-<div class="col-md-3">
-<a href="credit-card-apply.jsp" class="text-decoration-none">
-<div class="card shadow text-center">
-<div class="card-body">
-<i class="bi bi-credit-card-fill fs-1 text-warning"></i>
-<h5 class="mt-3">Apply Card</h5>
-</div>
-</div>
-</a>
-</div>
-
-<div class="col-md-3">
-<a href="credit-card-list.jsp" class="text-decoration-none">
-<div class="card shadow text-center">
-<div class="card-body">
-<i class="bi bi-wallet-fill fs-1 text-danger"></i>
-<h5 class="mt-3">Card List</h5>
-</div>
-</div>
-</a>
-</div>
-
-</div>
-
-</section>
-<!-- ================= ANALYTICS SECTION ================= -->
-
-<section class="container mt-5">
-
-    <h2 class="text-center section-title mb-5">
-        <i class="bi bi-bar-chart-line-fill"></i>
-        Banking Analytics
-    </h2>
-
-    <div class="row">
-
-        <div class="col-lg-6 mb-4">
-
-            <div class="card shadow">
-
-                <div class="card-header bg-primary text-white">
-
-                    Monthly Transactions
-
-                </div>
-
-                <div class="card-body">
-
-                    <canvas id="transactionChart"></canvas>
-
-                </div>
-
+                </a>
             </div>
 
-        </div>
-
-        <div class="col-lg-6 mb-4">
-
-            <div class="card shadow">
-
-                <div class="card-header bg-success text-white">
-
-                    Loan Distribution
-
-                </div>
-
-                <div class="card-body">
-
-                    <canvas id="loanChart"></canvas>
-
-                </div>
-
+            <!-- 2. Profile Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="${pageContext.request.contextPath}/user/profile" class="feature-card">
+                    <div class="feature-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">Profile & Settings</h4>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <p class="text-muted flex-grow-1">
+                        View customer KYC details, update phone number, address, city, state, and pincode.
+                    </p>
+                    <div class="mt-3 text-info fw-semibold d-flex align-items-center gap-1">
+                        View Profile <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
             </div>
 
-        </div>
+            <!-- 3. Accounts Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="user/accounts.jsp" class="feature-card">
+                    <div class="feature-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">Bank Accounts</h4>
+                        <span class="badge bg-secondary">Next Step</span>
+                    </div>
+                    <p class="text-muted flex-grow-1">
+                        Savings and Current account creation, view balances, account numbers, and statements linked by User ID.
+                    </p>
+                    <div class="mt-3 text-success fw-semibold d-flex align-items-center gap-1">
+                        Manage Accounts <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
 
+            <!-- 4. Transactions Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="user/transactions.jsp" class="feature-card">
+                    <div class="feature-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">Transactions</h4>
+                        <span class="badge bg-secondary">Next Step</span>
+                    </div>
+                    <p class="text-muted flex-grow-1">
+                        Fund transfers between accounts, deposits, withdrawals, and full transaction history statements.
+                    </p>
+                    <div class="mt-3 text-warning fw-semibold d-flex align-items-center gap-1">
+                        View Transactions <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 5. Loans Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="user/loans.jsp" class="feature-card">
+                    <div class="feature-icon bg-secondary bg-opacity-10 text-secondary">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">Loans & EMI</h4>
+                        <span class="badge bg-secondary">Next Step</span>
+                    </div>
+                    <p class="text-muted flex-grow-1">
+                        Personal, education, and home loan applications, approval workflow, and monthly EMI tracker.
+                    </p>
+                    <div class="mt-3 text-secondary fw-semibold d-flex align-items-center gap-1">
+                        View Loans <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 6. Cards Module -->
+            <div class="col-md-6 col-lg-4">
+                <a href="user/cards.jsp" class="feature-card">
+                    <div class="feature-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">Debit & Credit Cards</h4>
+                        <span class="badge bg-secondary">Next Step</span>
+                    </div>
+                    <p class="text-muted flex-grow-1">
+                        Debit/credit card requests, PIN setup, transaction limits, and card block/unblock toggles.
+                    </p>
+                    <div class="mt-3 text-danger fw-semibold d-flex align-items-center gap-1">
+                        Manage Cards <i class="bi bi-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 
-</section>
-<!-- ================= PRODUCTS ================= -->
+    <!-- Complete Site Map & URL Matrix -->
+    <div id="sitemap" class="card border-0 shadow-sm p-4 rounded-3 mb-5">
+        <h3 class="fw-bold text-primary mb-3"><i class="bi bi-compass"></i> Complete Application Navigation Directory</h3>
+        <p class="text-muted mb-4">Click any link below to test the corresponding page or Servlet endpoint directly:</p>
 
-<section class="container mt-5">
-
-<h2 class="text-center section-title mb-5">
-
-Our Banking Products
-
-</h2>
-
-<div class="row g-4">
-
-<div class="col-md-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-wallet2 fs-1 text-primary"></i>
-
-<h5 class="mt-3">Savings Account</h5>
-
-<p>Safe & Secure Savings</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-bank fs-1 text-success"></i>
-
-<h5 class="mt-3">Current Account</h5>
-
-<p>Business Banking</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-house-fill fs-1 text-warning"></i>
-
-<h5 class="mt-3">Home Loan</h5>
-
-<p>Low Interest Rate</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<i class="bi bi-car-front-fill fs-1 text-danger"></i>
-
-<h5 class="mt-3">Vehicle Loan</h5>
-
-<p>Easy EMI Options</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-<!-- ================= TESTIMONIAL ================= -->
-
-<section class="container mt-5">
-
-<h2 class="text-center section-title mb-5">
-
-Happy Customers
-
-</h2>
-
-<div id="testimonialCarousel"
-class="carousel slide"
-data-bs-ride="carousel">
-
-<div class="carousel-inner">
-
-<div class="carousel-item active">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<h3>★★★★★</h3>
-
-<p>
-
-Excellent Banking Experience. Fast and Secure.
-
-</p>
-
-<h5>- Rahul Sharma</h5>
-
-</div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Page / Endpoint</th>
+                        <th>Path / URL</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Direct Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Home Landing Page</strong></td>
+                        <td><code>index.jsp</code></td>
+                        <td><span class="badge bg-info">JSP View</span></td>
+                        <td>Main portal entry point with full navigation</td>
+                        <td><a href="index.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Registration Form</strong></td>
+                        <td><code>user/register.jsp</code></td>
+                        <td><span class="badge bg-info">JSP View</span></td>
+                        <td>Form to create a new customer account</td>
+                        <td><a href="user/register.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Registration Servlet</strong></td>
+                        <td><code>/user/register</code></td>
+                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
+                        <td>Direct JDBC INSERT to <code>ebanking.users</code></td>
+                        <td><a href="user/register.jsp" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Login Form</strong></td>
+                        <td><code>user/login.jsp</code></td>
+                        <td><span class="badge bg-info">JSP View</span></td>
+                        <td>Customer login screen with error feedback</td>
+                        <td><a href="user/login.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Login Servlet</strong></td>
+                        <td><code>/user/login</code></td>
+                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
+                        <td>Direct JDBC authentication and session creation</td>
+                        <td><a href="user/login.jsp" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Dashboard</strong></td>
+                        <td><code>user/dashboard.jsp</code></td>
+                        <td><span class="badge bg-info">JSP View</span></td>
+                        <td>Authenticated user landing page with module quick-links</td>
+                        <td><a href="user/dashboard.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Profile Servlet</strong></td>
+                        <td><code>/user/profile</code></td>
+                        <td><span class="badge bg-primary">Servlet (GET)</span></td>
+                        <td>Fetches latest user data via JDBC & forwards to profile.jsp</td>
+                        <td><a href="${pageContext.request.contextPath}/user/profile" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Edit Profile Form</strong></td>
+                        <td><code>user/edit-profile.jsp</code></td>
+                        <td><span class="badge bg-info">JSP View</span></td>
+                        <td>Pre-filled form to update phone, address, and city</td>
+                        <td><a href="${pageContext.request.contextPath}/user/update-profile" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Update Profile Servlet</strong></td>
+                        <td><code>/user/update-profile</code></td>
+                        <td><span class="badge bg-primary">Servlet (POST)</span></td>
+                        <td>Direct JDBC UPDATE statement and session refresh</td>
+                        <td><a href="${pageContext.request.contextPath}/user/update-profile" class="btn btn-sm btn-outline-secondary">Go to Form</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Logout Servlet</strong></td>
+                        <td><code>/user/logout</code></td>
+                        <td><span class="badge bg-danger">Servlet (GET)</span></td>
+                        <td>Destroys active session and redirects to login</td>
+                        <td><a href="${pageContext.request.contextPath}/user/logout" class="btn btn-sm btn-outline-danger">Logout</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Accounts Module</strong></td>
+                        <td><code>user/accounts.jsp</code></td>
+                        <td><span class="badge bg-secondary">Placeholder</span></td>
+                        <td>Next module: Accounts management view</td>
+                        <td><a href="user/accounts.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transactions Module</strong></td>
+                        <td><code>user/transactions.jsp</code></td>
+                        <td><span class="badge bg-secondary">Placeholder</span></td>
+                        <td>Next module: Transfer, deposit, and statement view</td>
+                        <td><a href="user/transactions.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Loans Module</strong></td>
+                        <td><code>user/loans.jsp</code></td>
+                        <td><span class="badge bg-secondary">Placeholder</span></td>
+                        <td>Next module: Loan applications view</td>
+                        <td><a href="user/loans.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cards Module</strong></td>
+                        <td><code>user/cards.jsp</code></td>
+                        <td><span class="badge bg-secondary">Placeholder</span></td>
+                        <td>Next module: Debit & Credit cards overview</td>
+                        <td><a href="user/cards.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 </div>
 
-</div>
-
-<div class="carousel-item">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<h3>★★★★★</h3>
-
-<p>
-
-Very Fast Loan Approval.
-
-</p>
-
-<h5>- Priya Das</h5>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="carousel-item">
-
-<div class="card shadow">
-
-<div class="card-body text-center">
-
-<h3>★★★★★</h3>
-
-<p>
-
-Highly Recommended Digital Banking.
-
-</p>
-
-<h5>- Amit Kumar</h5>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<button class="carousel-control-prev"
-type="button"
-data-bs-target="#testimonialCarousel"
-data-bs-slide="prev">
-
-<span class="carousel-control-prev-icon"></span>
-
-</button>
-
-<button class="carousel-control-next"
-type="button"
-data-bs-target="#testimonialCarousel"
-data-bs-slide="next">
-
-<span class="carousel-control-next-icon"></span>
-
-</button>
-
-</div>
-
-</section>
-<!-- ================= BRANCH ================= -->
-
-<section class="container mt-5">
-
-<h2 class="text-center section-title mb-5">
-
-Our Branches
-
-</h2>
-
-<div class="row">
-
-<div class="col-md-3">
-
-<div class="card shadow text-center">
-
-<div class="card-body">
-
-<i class="bi bi-geo-alt-fill fs-1 text-danger"></i>
-
-<h5>New Delhi</h5>
-
-<p>Main Branch</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow text-center">
-
-<div class="card-body">
-
-<i class="bi bi-geo-alt-fill fs-1 text-success"></i>
-
-<h5>Bengaluru</h5>
-
-<p>Regional Office</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow text-center">
-
-<div class="card-body">
-
-<i class="bi bi-geo-alt-fill fs-1 text-primary"></i>
-
-<h5>Hyderabad</h5>
-
-<p>Customer Care</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="card shadow text-center">
-
-<div class="card-body">
-
-<i class="bi bi-geo-alt-fill fs-1 text-warning"></i>
-
-<h5>Mumbai</h5>
-
-<p>Branch Office</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-<footer class="bg-dark text-white mt-5">
-
-<div class="container">
-
-<div class="row py-5">
-
-<div class="col-md-4">
-
-<h4>
-
-🏦 MyBank
-
-</h4>
-
-<p>
-
-Enterprise Banking Management System
-
-</p>
-
-<p>
-
-Secure Banking
-
-</p>
-
-<p>
-
-24×7 Customer Support
-
-</p>
-
-</div>
-
-<div class="col-md-2">
-
-<h5>
-
-Quick Links
-
-</h5>
-
-<ul class="list-unstyled">
-
-<li><a href="index.jsp" class="text-white text-decoration-none">Home</a></li>
-
-<li><a href="user/login.jsp" class="text-white text-decoration-none">Login</a></li>
-
-<li><a href="user/register.jsp" class="text-white text-decoration-none">Register</a></li>
-
-<li><a href="contact.jsp" class="text-white text-decoration-none">Contact</a></li>
-
-</ul>
-
-</div>
-
-<div class="col-md-3">
-
-<h5>
-
-Banking Services
-
-</h5>
-
-<ul class="list-unstyled">
-
-<li>Savings Account</li>
-
-<li>Current Account</li>
-
-<li>Loans</li>
-
-<li>Credit Cards</li>
-
-<li>Fixed Deposits</li>
-
-</ul>
-
-</div>
-
-<div class="col-md-3">
-
-<h5>
-
-Contact
-
-</h5>
-
-<p>
-
-📍 New Delhi, Odisha
-
-</p>
-
-<p>
-
-☎ 1800-123-4567
-
-</p>
-
-<p>
-
-✉ support@mybank.com
-
-</p>
-
-<div>
-
-<i class="bi bi-facebook fs-3 me-3"></i>
-
-<i class="bi bi-twitter-x fs-3 me-3"></i>
-
-<i class="bi bi-instagram fs-3 me-3"></i>
-
-<i class="bi bi-linkedin fs-3"></i>
-
-</div>
-
-</div>
-
-</div>
-
-<hr>
-
-<div class="text-center pb-3">
-
-© 2026 MyBank Banking Management System
-
-</div>
-
-</div>
-
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <h5 class="fw-bold mb-2">E-Banking Management System</h5>
+        <p class="text-white-50 mb-3">Academic College Project • JSP + Servlet + JDBC + MySQL Architecture</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="index.jsp" class="text-white-50 text-decoration-none">Home</a>
+            <span class="text-white-50">•</span>
+            <a href="user/login.jsp" class="text-white-50 text-decoration-none">Login</a>
+            <span class="text-white-50">•</span>
+            <a href="user/register.jsp" class="text-white-50 text-decoration-none">Register</a>
+            <span class="text-white-50">•</span>
+            <a href="user/dashboard.jsp" class="text-white-50 text-decoration-none">Dashboard</a>
+        </div>
+    </div>
 </footer>
 
+<!-- Bootstrap Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-
-const ctx1=document.getElementById("transactionChart");
-
-new Chart(ctx1,{
-
-type:"bar",
-
-data:{
-
-labels:["Jan","Feb","Mar","Apr","May","Jun"],
-
-datasets:[{
-
-label:"Transactions",
-
-data:[120,190,300,500,220,650],
-
-backgroundColor:[
-"#0d6efd",
-"#198754",
-"#ffc107",
-"#dc3545",
-"#6610f2",
-"#20c997"
-]
-
-}]
-
-}
-
-});
-
-const ctx2=document.getElementById("loanChart");
-
-new Chart(ctx2,{
-
-type:"pie",
-
-data:{
-
-labels:["Home","Vehicle","Education","Personal"],
-
-datasets:[{
-
-data:[40,20,15,25],
-
-backgroundColor:[
-
-"#0d6efd",
-"#198754",
-"#ffc107",
-"#dc3545"
-
-]
-
-}]
-
-}
-
-});
-
-</script>
-<script>
-
-/* Scroll Button */
-
-let topBtn=document.getElementById("topBtn");
-
-window.onscroll=function(){
-
-if(document.body.scrollTop>300 ||
-
-document.documentElement.scrollTop>300)
-
-topBtn.style.display="block";
-
-else
-
-topBtn.style.display="none";
-
-};
-
-topBtn.onclick=function(){
-
-window.scrollTo({
-
-top:0,
-
-behavior:"smooth"
-
-});
-
-};
-
-/* Dark Mode */
-
-document.getElementById("themeBtn")
-
-.addEventListener("click",function(){
-
-document.body.classList.toggle("dark-mode");
-
-});
-
-/* Counter Animation */
-
-let counters=document.querySelectorAll(".counter");
-
-counters.forEach(counter=>{
-
-let value=0;
-
-let target=parseInt(
-
-counter.innerText.replace(/[^0-9]/g,'')
-
-);
-
-let interval=setInterval(()=>{
-
-value+=Math.ceil(target/100);
-
-if(value>=target){
-
-counter.innerText=target.toLocaleString();
-
-clearInterval(interval);
-
-}else{
-
-counter.innerText=value.toLocaleString();
-
-}
-
-},20);
-
-});
-
-/* Search */
-
-const searchBox=document.querySelector("input[type='search']");
-
-searchBox.addEventListener("keyup",function(){
-
-let value=this.value.toLowerCase();
-
-document.querySelectorAll(".card").forEach(card=>{
-
-let txt=card.innerText.toLowerCase();
-
-card.style.display=
-
-txt.includes(value)
-
-?
-
-"block"
-
-:
-
-"none";
-
-});
-
-});
-
-</script>
 </body>
 </html>

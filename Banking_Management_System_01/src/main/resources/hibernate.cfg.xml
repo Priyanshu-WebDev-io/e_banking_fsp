@@ -56,7 +56,6 @@ org.hibernate.dialect.MySQLDialect
         <mapping class="entity.Loan"/>
         <mapping class="entity.Branch"/>
         <mapping class="entity.Notification"/>
-        <mapping class="entity.AuditLog"/>
         <mapping class="entity.Beneficiary"/>
         <mapping class="entity.Nominee"/>
         <mapping class="entity.CreditCard"/>

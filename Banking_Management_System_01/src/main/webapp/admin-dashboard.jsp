@@ -73,13 +73,6 @@ Bank Admin Dashboard
 </div>
 <div class="mt-3">
 
-<a href="auditLogs"
-class="btn btn-dark">
-
-Audit Logs
-
-</a>
-
 <a href="loginHistory"
 class="btn btn-primary">
 
