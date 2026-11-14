@@ -24,6 +24,7 @@
         <h2>E-Banking Customer Portal</h2>
         <div class="user-info">
             <span>Welcome, <strong><%= userFullName %></strong></span>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
             <a href="${pageContext.request.contextPath}/user/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
         </div>
     </div>

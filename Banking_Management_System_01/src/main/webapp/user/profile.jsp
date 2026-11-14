@@ -57,6 +57,15 @@
 <body>
 
 <div class="container">
+    <div class="navbar-custom">
+        <h2>Customer Profile</h2>
+        <div class="user-info">
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
+            <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
+            <a href="${pageContext.request.contextPath}/user/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+        </div>
+    </div>
+
     <div class="card">
         <div class="brand-header">
             <h2>Customer Profile</h2>

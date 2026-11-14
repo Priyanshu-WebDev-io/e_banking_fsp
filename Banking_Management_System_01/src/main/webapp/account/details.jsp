@@ -34,6 +34,15 @@
 <body>
 
 <div class="container">
+    <div class="navbar-custom">
+        <h2>Account Details</h2>
+        <div class="user-info">
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
+            <a href="${pageContext.request.contextPath}/account/list" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Accounts</a>
+            <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
+        </div>
+    </div>
+
     <div class="card">
         <div class="brand-header">
             <h2>Account Details</h2>

@@ -10,6 +10,14 @@
 <body>
 
 <div class="container-sm">
+    <div class="navbar-custom">
+        <h2>E-Banking</h2>
+        <div class="user-info">
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
+            <a href="register.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Register</a>
+        </div>
+    </div>
+
     <div class="card">
         <div class="brand-header">
             <h2>User Login</h2>
