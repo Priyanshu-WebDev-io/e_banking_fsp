@@ -107,7 +107,7 @@
                         <i class="bi bi-grid-fill"></i> Banking Services
                     </a>
                     <ul class="dropdown-menu shadow">
-                        <li><a class="dropdown-item" href="user/accounts.jsp"><i class="bi bi-wallet2 text-primary me-2"></i> My Accounts</a></li>
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/list"><i class="bi bi-wallet2 text-primary me-2"></i> My Accounts</a></li>
                         <li><a class="dropdown-item" href="user/transactions.jsp"><i class="bi bi-arrow-left-right text-success me-2"></i> Transactions & Transfers</a></li>
                         <li><a class="dropdown-item" href="user/loans.jsp"><i class="bi bi-file-earmark-text text-warning me-2"></i> Loan Applications</a></li>
                         <li><a class="dropdown-item" href="user/cards.jsp"><i class="bi bi-credit-card text-danger me-2"></i> Debit & Credit Cards</a></li>
@@ -230,13 +230,13 @@
 
             <!-- 3. Accounts Module -->
             <div class="col-md-6 col-lg-4">
-                <a href="user/accounts.jsp" class="feature-card">
+                <a href="${pageContext.request.contextPath}/account/list" class="feature-card">
                     <div class="feature-icon bg-success bg-opacity-10 text-success">
                         <i class="bi bi-wallet2"></i>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h4 class="fw-bold mb-0">Bank Accounts</h4>
-                        <span class="badge bg-secondary">Next Step</span>
+                        <span class="badge bg-success">Active</span>
                     </div>
                     <p class="text-muted flex-grow-1">
                         Savings and Current account creation, view balances, account numbers, and statements linked by User ID.
@@ -394,11 +394,18 @@
                         <td><a href="${pageContext.request.contextPath}/user/logout" class="btn btn-sm btn-outline-danger">Logout</a></td>
                     </tr>
                     <tr>
-                        <td><strong>Accounts Module</strong></td>
-                        <td><code>user/accounts.jsp</code></td>
-                        <td><span class="badge bg-secondary">Placeholder</span></td>
-                        <td>Next module: Accounts management view</td>
-                        <td><a href="user/accounts.jsp" class="btn btn-sm btn-outline-primary">Open</a></td>
+                        <td><strong>View Accounts List</strong></td>
+                        <td><code>/account/list</code></td>
+                        <td><span class="badge bg-primary">Servlet (GET)</span></td>
+                        <td>Displays all bank accounts & balance for logged-in user</td>
+                        <td><a href="${pageContext.request.contextPath}/account/list" class="btn btn-sm btn-outline-primary">Open</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open New Account</strong></td>
+                        <td><code>/account/create</code></td>
+                        <td><span class="badge bg-primary">Servlet (GET/POST)</span></td>
+                        <td>Opens Savings, Current, or Salary account via direct JDBC</td>
+                        <td><a href="${pageContext.request.contextPath}/account/create" class="btn btn-sm btn-outline-primary">Open</a></td>
                     </tr>
                     <tr>
                         <td><strong>Transactions Module</strong></td>

@@ -44,7 +44,7 @@
             <p>View personal details, contact info and update address</p>
         </a>
 
-        <a href="accounts.jsp" class="dashboard-card">
+        <a href="${pageContext.request.contextPath}/account/list" class="dashboard-card">
             <div class="card-icon">🏦</div>
             <h3>My Accounts</h3>
             <p>View savings, current accounts, balance and statements</p>
