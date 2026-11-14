@@ -188,8 +188,8 @@
                 <a href="${pageContext.request.contextPath}/account/details?accountNumber=<%= accNum %>" class="btn btn-outline" style="flex: 1;">
                     View Details
                 </a>
-                <a href="${pageContext.request.contextPath}/user/transactions.jsp" class="btn btn-secondary" style="flex: 1;">
-                    Transfer Money
+                <a href="${pageContext.request.contextPath}/account/create" class="btn btn-secondary" style="flex: 1;">
+                    + Open Another
                 </a>
             </div>
         </div>

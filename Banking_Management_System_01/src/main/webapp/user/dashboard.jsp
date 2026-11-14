@@ -32,41 +32,29 @@
     <div class="card" style="margin-bottom: 24px;">
         <h3>Hello, <%= firstName != null ? firstName : "Customer" %>!</h3>
         <p style="color: var(--text-muted); margin-top: 4px;">
-            Manage your personal profile, bank accounts, fund transfers, loans, and debit/credit cards all in one place.
+            Welcome to your digital banking portal. Manage your profile and bank accounts below.
         </p>
     </div>
 
-    <h3 style="margin-bottom: 12px; color: var(--text-main);">Quick Services</h3>
+    <h3 style="margin-bottom: 12px; color: var(--text-main);">Banking Services</h3>
 
     <div class="dashboard-grid">
         <a href="${pageContext.request.contextPath}/user/profile" class="dashboard-card">
             <div class="card-icon">👤</div>
             <h3>My Profile</h3>
-            <p>View personal details, contact info and update address</p>
+            <p>View personal KYC details, phone number and update residential address</p>
         </a>
 
         <a href="${pageContext.request.contextPath}/account/list" class="dashboard-card">
             <div class="card-icon">🏦</div>
             <h3>My Accounts</h3>
-            <p>View savings, current accounts, balance and statements</p>
+            <p>View your active bank accounts, check available balance and IFSC codes</p>
         </a>
 
-        <a href="transactions.jsp" class="dashboard-card">
-            <div class="card-icon">💳</div>
-            <h3>Transactions</h3>
-            <p>Transfer funds, deposit, withdraw and check transaction logs</p>
-        </a>
-
-        <a href="loans.jsp" class="dashboard-card">
-            <div class="card-icon">📄</div>
-            <h3>Loans</h3>
-            <p>View personal, home, car loan applications and EMI status</p>
-        </a>
-
-        <a href="cards.jsp" class="dashboard-card">
-            <div class="card-icon">💳</div>
-            <h3>Cards</h3>
-            <p>Manage your linked debit cards and credit cards</p>
+        <a href="${pageContext.request.contextPath}/account/create" class="dashboard-card">
+            <div class="card-icon">➕</div>
+            <h3>Open Account</h3>
+            <p>Open a new Savings or Current account with instant account number generation</p>
         </a>
 
         <a href="${pageContext.request.contextPath}/user/logout" class="dashboard-card" style="border-color: #ffcdd2;">
