@@ -1,10 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.List, java.util.Map" %>
 <%
     Integer userId = (Integer) session.getAttribute("userId");
     if (userId == null) {
         response.sendRedirect(request.getContextPath() + "/user/login.jsp");
         return;
     }
+
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> banks = (List<Map<String, Object>>) request.getAttribute("banks");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +47,32 @@
         %>
 
         <form action="${pageContext.request.contextPath}/account/create" method="post">
+            <div class="form-group">
+                <label for="bankId">Select Partner Bank *</label>
+                <select id="bankId" name="bankId" required>
+                <%
+                    if (banks != null && !banks.isEmpty()) {
+                        for (Map<String, Object> b : banks) {
+                %>
+                    <option value="<%= b.get("bankId") %>">
+                        🏛️ <%= b.get("bankName") %> (<%= b.get("bankCode") %> - IFSC Prefix: <%= b.get("ifscPrefix") %>)
+                    </option>
+                <%
+                        }
+                    } else {
+                %>
+                    <option value="1">🏛️ State Bank of India (SBIN - Default)</option>
+                    <option value="2">🏛️ HDFC Bank (HDFC)</option>
+                    <option value="3">🏛️ ICICI Bank (ICIC)</option>
+                <%
+                    }
+                %>
+                </select>
+                <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 4px;">
+                    Your account will be held directly at the chosen partner institution.
+                </small>
+            </div>
+
             <div class="form-group">
                 <label for="accountType">Account Type *</label>
                 <select id="accountType" name="accountType" required>

@@ -40,10 +40,13 @@ public class AccountDetailsServlet extends HttpServlet {
         }
 
         String sql = """
-                SELECT *
-                FROM accounts
-                WHERE (account_number = ? OR account_id = ?)
-                  AND user_id = ?
+                SELECT a.*,
+                       COALESCE(b.bank_name, 'Partner Bank') AS bank_name,
+                       COALESCE(b.bank_code, 'BANK') AS bank_code
+                FROM accounts a
+                LEFT JOIN banks b ON a.bank_id = b.bank_id
+                WHERE (a.account_number = ? OR a.account_id = ?)
+                  AND a.user_id = ?
                 """;
 
         try (Connection con = DBConnection.getConnection();
@@ -70,6 +73,8 @@ public class AccountDetailsServlet extends HttpServlet {
                     request.setAttribute("ifscCode", rs.getString("ifsc_code"));
                     request.setAttribute("status", rs.getString("status"));
                     request.setAttribute("createdAt", rs.getTimestamp("created_at"));
+                    request.setAttribute("bankName", rs.getString("bank_name"));
+                    request.setAttribute("bankCode", rs.getString("bank_code"));
 
                     request.getRequestDispatcher("/account/details.jsp").forward(request, response);
                 } else {

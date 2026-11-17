@@ -37,12 +37,27 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- =============================================
--- 2. Accounts Table (Accounts Module)
+-- 2. Banks Table (Banks Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS banks (
+    bank_id INT PRIMARY KEY AUTO_INCREMENT,
+    bank_name VARCHAR(100) NOT NULL UNIQUE,
+    bank_code VARCHAR(10) NOT NULL UNIQUE,
+    ifsc_prefix VARCHAR(10) NOT NULL,
+    commission_rate DECIMAL(5, 2) NOT NULL DEFAULT 0.50,
+    status ENUM('ACTIVE', 'SUSPENDED') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- 3. Accounts Table (Accounts Module)
 -- =============================================
 CREATE TABLE IF NOT EXISTS accounts (
     account_id INT PRIMARY KEY AUTO_INCREMENT,
     account_number VARCHAR(20) NOT NULL UNIQUE,
     user_id INT NOT NULL,
+    bank_id INT NULL,
     account_type ENUM('SAVINGS', 'CURRENT', 'SALARY', 'FIXED_DEPOSIT') DEFAULT 'SAVINGS',
     balance DECIMAL(15, 2) NOT NULL DEFAULT 500.00,
     branch_name VARCHAR(100) DEFAULT 'Main Branch - Mumbai',
@@ -50,11 +65,12 @@ CREATE TABLE IF NOT EXISTS accounts (
     status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED', 'CLOSED') DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_accounts_bank FOREIGN KEY (bank_id) REFERENCES banks(bank_id) ON DELETE SET NULL
 );
 
 -- =============================================
--- 3. Admins Table (Admin Module)
+-- 4. Admins Table (Admin Module)
 -- =============================================
 CREATE TABLE IF NOT EXISTS admins (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -76,13 +92,25 @@ VALUES
 ON DUPLICATE KEY UPDATE first_name = VALUES(first_name);
 
 -- =============================================
+-- Mock Partner Banks
+-- =============================================
+INSERT INTO banks (bank_id, bank_name, bank_code, ifsc_prefix, commission_rate, status)
+VALUES
+(1, 'State Bank of India', 'SBIN', 'SBIN000101', 0.50, 'ACTIVE'),
+(2, 'HDFC Bank', 'HDFC', 'HDFC000201', 0.75, 'ACTIVE'),
+(3, 'ICICI Bank', 'ICIC', 'ICIC000301', 0.60, 'ACTIVE'),
+(4, 'Axis Bank', 'UTIB', 'UTIB000401', 0.70, 'ACTIVE'),
+(5, 'Punjab National Bank', 'PUNB', 'PUNB000501', 0.50, 'ACTIVE')
+ON DUPLICATE KEY UPDATE bank_name = VALUES(bank_name);
+
+-- =============================================
 -- Mock Bank Accounts
 -- =============================================
-INSERT INTO accounts (account_id, account_number, user_id, account_type, balance, branch_name, ifsc_code, status)
+INSERT INTO accounts (account_id, account_number, user_id, bank_id, account_type, balance, branch_name, ifsc_code, status)
 VALUES
-(1, '100100100101', 1, 'SAVINGS', 50000.00, 'Main Branch - Mumbai', 'EBANK000101', 'ACTIVE'),
-(2, '100100200202', 2, 'CURRENT', 85000.00, 'Indiranagar - Bengaluru', 'EBANK000201', 'ACTIVE'),
-(3, '100100300303', 3, 'SAVINGS', 25000.00, 'Connaught Place - Delhi', 'EBANK000301', 'ACTIVE')
+(1, '100100100101', 1, 1, 'SAVINGS', 50000.00, 'Main Branch - Mumbai', 'SBIN000101', 'ACTIVE'),
+(2, '100100200202', 2, 2, 'CURRENT', 85000.00, 'Indiranagar - Bengaluru', 'HDFC000201', 'ACTIVE'),
+(3, '100100300303', 3, 3, 'SAVINGS', 25000.00, 'Connaught Place - Delhi', 'ICIC000301', 'ACTIVE')
 ON DUPLICATE KEY UPDATE balance = VALUES(balance);
 
 -- =============================================

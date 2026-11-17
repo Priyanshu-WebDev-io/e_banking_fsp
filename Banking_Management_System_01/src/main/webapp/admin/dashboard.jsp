@@ -16,6 +16,9 @@
     Integer totalAccounts = (Integer) request.getAttribute("totalAccounts");
     if (totalAccounts == null) totalAccounts = 0;
 
+    Integer totalBanks = (Integer) request.getAttribute("totalBanks");
+    if (totalBanks == null) totalBanks = 0;
+
     BigDecimal totalDeposits = (BigDecimal) request.getAttribute("totalDeposits");
     if (totalDeposits == null) totalDeposits = BigDecimal.ZERO;
 
@@ -122,7 +125,8 @@
         <div class="user-info">
             <span class="nav-admin-badge">Admin</span>
             <span>Welcome, <strong><%= adminName != null ? adminName : adminUsername %></strong></span>
-            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
+            <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏛️ Partner Banks</a>
             <a href="${pageContext.request.contextPath}/admin/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
         </div>
     </div>
@@ -142,6 +146,14 @@
             <div class="stat-info">
                 <h4>Total Bank Accounts</h4>
                 <div class="stat-value"><%= totalAccounts %></div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="cursor: pointer;" onclick="location.href='${pageContext.request.contextPath}/admin/banks'">
+            <div class="stat-icon" style="background-color: #f5f3ff; color: #7c3aed;">🏛️</div>
+            <div class="stat-info">
+                <h4>Partner Banks</h4>
+                <div class="stat-value" style="color: #7c3aed;"><%= totalBanks %></div>
             </div>
         </div>
 
@@ -242,7 +254,10 @@
                             <td>
                                 <strong style="letter-spacing: 0.5px; color: var(--primary);">
                                     <%= a.get("accountNumber") %>
-                                </strong>
+                                </strong><br>
+                                <span class="badge-type" style="font-size: 0.72rem; padding: 2px 6px;">
+                                    🏛️ <%= a.get("bankName") != null ? a.get("bankName") : "Partner Bank" %>
+                                </span>
                             </td>
                             <td>
                                 <strong><%= a.get("customerName") %></strong><br>

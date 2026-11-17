@@ -35,6 +35,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         int totalCustomers = 0;
         int totalAccounts = 0;
+        int totalBanks = 0;
         BigDecimal totalDeposits = BigDecimal.ZERO;
 
         List<Map<String, Object>> customers = new ArrayList<>();
@@ -61,6 +62,15 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
 
+            // 2b. Metric: Total Partner Banks
+            String countBanksSql = "SELECT COUNT(*) FROM banks";
+            try (PreparedStatement ps = con.prepareStatement(countBanksSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalBanks = rs.getInt(1);
+                }
+            }
+
             // 3. Customers List
             String customersSql = """
                     SELECT user_id, first_name, last_name, email, phone, city, state, status, created_at
@@ -84,13 +94,16 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
 
-            // 4. Accounts List with Customer Info
+            // 4. Accounts List with Customer & Bank Info
             String accountsSql = """
                     SELECT a.account_id, a.account_number, a.account_type, a.balance,
                            a.branch_name, a.ifsc_code, a.status, a.created_at,
-                           u.first_name, u.last_name, u.email
+                           u.first_name, u.last_name, u.email,
+                           COALESCE(b.bank_name, 'Partner Bank') AS bank_name,
+                           COALESCE(b.bank_code, 'BANK') AS bank_code
                     FROM accounts a
                     JOIN users u ON a.user_id = u.user_id
+                    LEFT JOIN banks b ON a.bank_id = b.bank_id
                     ORDER BY a.account_id DESC
                     """;
             try (PreparedStatement ps = con.prepareStatement(accountsSql);
@@ -107,6 +120,8 @@ public class AdminDashboardServlet extends HttpServlet {
                     a.put("createdAt", rs.getTimestamp("created_at"));
                     a.put("customerName", rs.getString("first_name") + " " + rs.getString("last_name"));
                     a.put("customerEmail", rs.getString("email"));
+                    a.put("bankName", rs.getString("bank_name"));
+                    a.put("bankCode", rs.getString("bank_code"));
                     accounts.add(a);
                 }
             }
@@ -118,6 +133,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         request.setAttribute("totalCustomers", totalCustomers);
         request.setAttribute("totalAccounts", totalAccounts);
+        request.setAttribute("totalBanks", totalBanks);
         request.setAttribute("totalDeposits", totalDeposits != null ? totalDeposits : BigDecimal.ZERO);
         request.setAttribute("customers", customers);
         request.setAttribute("accounts", accounts);

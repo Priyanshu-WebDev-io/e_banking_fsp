@@ -37,11 +37,14 @@ public class AccountListServlet extends HttpServlet {
         int userId = (Integer) session.getAttribute("userId");
 
         String sql = """
-                SELECT account_id, account_number, account_type, balance,
-                       branch_name, ifsc_code, status, created_at
-                FROM accounts
-                WHERE user_id = ?
-                ORDER BY created_at DESC
+                SELECT a.account_id, a.account_number, a.account_type, a.balance,
+                       a.branch_name, a.ifsc_code, a.status, a.created_at,
+                       COALESCE(b.bank_name, 'Partner Bank') AS bank_name,
+                       COALESCE(b.bank_code, 'BANK') AS bank_code
+                FROM accounts a
+                LEFT JOIN banks b ON a.bank_id = b.bank_id
+                WHERE a.user_id = ?
+                ORDER BY a.created_at DESC
                 """;
 
         List<Map<String, Object>> accounts = new ArrayList<>();
@@ -67,6 +70,8 @@ public class AccountListServlet extends HttpServlet {
                     acc.put("ifscCode", rs.getString("ifsc_code"));
                     acc.put("status", rs.getString("status"));
                     acc.put("createdAt", rs.getTimestamp("created_at"));
+                    acc.put("bankName", rs.getString("bank_name"));
+                    acc.put("bankCode", rs.getString("bank_code"));
 
                     accounts.add(acc);
                 }

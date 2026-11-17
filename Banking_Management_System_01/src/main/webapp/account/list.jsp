@@ -140,6 +140,7 @@
                 String branch = (String) acc.get("branchName");
                 String ifsc = (String) acc.get("ifscCode");
                 String status = (String) acc.get("status");
+                String bankName = (String) acc.get("bankName");
     %>
         <div class="account-card">
             <div class="account-header">
@@ -149,6 +150,9 @@
                     </span>
                     <span class="badge badge-active" style="margin-left: 8px;">
                         <%= accType %>
+                    </span>
+                    <span class="badge" style="background: #eff6ff; color: #1d4ed8; margin-left: 6px;">
+                        🏛️ <%= bankName != null ? bankName : "Partner Bank" %>
                     </span>
                 </div>
                 <div>

@@ -21,6 +21,7 @@
     String branchName = (String) request.getAttribute("branchName");
     String ifscCode = (String) request.getAttribute("ifscCode");
     String status = (String) request.getAttribute("status");
+    String bankName = (String) request.getAttribute("bankName");
     Object createdAt = request.getAttribute("createdAt");
 %>
 <!DOCTYPE html>
@@ -61,6 +62,10 @@
                 <tr>
                     <th>Account Number</th>
                     <td><strong><%= accountNumber %></strong></td>
+                </tr>
+                <tr>
+                    <th>Holding Bank</th>
+                    <td><strong style="color: var(--primary);">🏛️ <%= bankName != null ? bankName : "Partner Bank" %></strong></td>
                 </tr>
                 <tr>
                     <th>Account Type</th>
