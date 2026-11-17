@@ -184,6 +184,10 @@ public class TransactionServlet extends HttpServlet {
                     con.rollback();
                     response.sendRedirect(request.getContextPath() + "/user/transactions?error=invalid_action");
                 }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                con.rollback();
+                response.sendRedirect(request.getContextPath() + "/user/transactions?error=" +
+                        java.net.URLEncoder.encode(e.getMessage() != null ? e.getMessage() : "Validation error", "UTF-8"));
             } catch (Exception e) {
                 con.rollback();
                 e.printStackTrace();
