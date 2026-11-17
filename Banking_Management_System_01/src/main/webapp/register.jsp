@@ -8,6 +8,15 @@
     boolean isAdminRole = "admin".equalsIgnoreCase(selectedRole);
 
     String error = (String) request.getAttribute("error");
+
+    String userTabClass = !isAdminRole ? "role-tab active-user" : "role-tab";
+    String adminTabClass = isAdminRole ? "role-tab active-admin" : "role-tab";
+    String customerDisplayStyle = !isAdminRole ? "display: block;" : "display: none;";
+    String adminDisplayStyle = isAdminRole ? "display: block;" : "display: none;";
+    String headerTitle = isAdminRole ? "Create Administrator Account" : "Create Customer Account";
+    String headerSubtitle = isAdminRole ? "Fill in administrator details to register your staff account" : "Fill in your details below to register your customer account";
+    String loginUrl = request.getContextPath() + (isAdminRole ? "/login.jsp?role=admin" : "/login.jsp?role=user");
+    String initialRoleStr = isAdminRole ? "ADMIN" : "USER";
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,7 +77,7 @@
 </head>
 <body>
 
-<div class="container-sm" id="regApp" data-role="<%= isAdminRole ? "ADMIN" : "USER" %>">
+<div class="container-sm" id="regApp" data-role="<%= initialRoleStr %>">
     <div class="navbar-custom">
         <h2>E-Banking</h2>
         <div class="user-info">
@@ -79,16 +88,16 @@
 
     <div class="card">
         <div class="brand-header">
-            <h2 id="regHeaderTitle"><%= isAdminRole ? "Create Administrator Account" : "Create Customer Account" %></h2>
-            <p id="regSubtitle"><%= isAdminRole ? "Fill in administrator details to register your staff account" : "Fill in your details below to register your customer account" %></p>
+            <h2 id="regHeaderTitle"><%= headerTitle %></h2>
+            <p id="regSubtitle"><%= headerSubtitle %></p>
         </div>
 
         <!-- Role Selector Switch -->
         <div class="role-switch-container">
-            <button type="button" class="role-tab <%= !isAdminRole ? "active-user" : "" %>" id="btnRegUser" onclick="setRegRole('USER')">
+            <button type="button" class="<%= userTabClass %>" id="btnRegUser" onclick="setRegRole('USER')">
                 <span style="font-size: 1.15rem;">👤</span> Customer
             </button>
-            <button type="button" class="role-tab <%= isAdminRole ? "active-admin" : "" %>" id="btnRegAdmin" onclick="setRegRole('ADMIN')">
+            <button type="button" class="<%= adminTabClass %>" id="btnRegAdmin" onclick="setRegRole('ADMIN')">
                 <span style="font-size: 1.15rem;">🛡️</span> Bank Admin
             </button>
         </div>
@@ -101,11 +110,11 @@
         <% } %>
 
         <!-- 1. Customer Registration Form -->
-        <div id="customerRegSection" style="<%= isAdminRole ? "display: none;" : "display: block;" %>">
+        <div id="customerRegSection" style="<%= customerDisplayStyle %>">
             <form action="${pageContext.request.contextPath}/user/register" method="post" onsubmit="return validatePasswords('userPass', 'userConfirmPass')">
                 <div class="form-group">
                     <label for="userName">Full Name *</label>
-                    <input type="text" id="userName" name="name" placeholder="Enter your full name" required <%= !isAdminRole ? "autofocus" : "" %>>
+                    <input type="text" id="userName" name="name" placeholder="Enter your full name" required>
                 </div>
 
                 <div class="form-group">
@@ -128,11 +137,11 @@
         </div>
 
         <!-- 2. Admin Registration Form -->
-        <div id="adminRegSection" style="<%= isAdminRole ? "display: block;" : "display: none;" %>">
+        <div id="adminRegSection" style="<%= adminDisplayStyle %>">
             <form action="${pageContext.request.contextPath}/admin/register" method="post" onsubmit="return validatePasswords('adminPass', 'adminConfirmPass')">
                 <div class="form-group">
                     <label for="adminName">Full Name *</label>
-                    <input type="text" id="adminName" name="name" placeholder="Enter administrator full name" required <%= isAdminRole ? "autofocus" : "" %>>
+                    <input type="text" id="adminName" name="name" placeholder="Enter administrator full name" required>
                 </div>
 
                 <div class="form-group">
@@ -155,7 +164,7 @@
         </div>
 
         <div class="auth-links">
-            Already have an account? <a href="${pageContext.request.contextPath}/login.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="loginLink">Login here</a>
+            Already have an account? <a href="<%= loginUrl %>" id="loginLink">Login here</a>
         </div>
     </div>
 </div>

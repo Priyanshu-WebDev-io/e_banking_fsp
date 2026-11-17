@@ -13,6 +13,15 @@
     }
     String registered = request.getParameter("registered");
     String loggedOut = request.getParameter("loggedOut");
+
+    String userTabClass = !isAdminRole ? "role-tab active-user" : "role-tab";
+    String adminTabClass = isAdminRole ? "role-tab active-admin" : "role-tab";
+    String customerDisplayStyle = !isAdminRole ? "display: block;" : "display: none;";
+    String adminDisplayStyle = isAdminRole ? "display: block;" : "display: none;";
+    String headerTitle = isAdminRole ? "Administrator Sign In" : "Customer Sign In";
+    String headerSubtitle = isAdminRole ? "Access the Bank Administrator Operations Portal" : "Access your Personal Internet Banking Account";
+    String registerUrl = request.getContextPath() + (isAdminRole ? "/register.jsp?role=admin" : "/register.jsp?role=user");
+    String initialRoleStr = isAdminRole ? "ADMIN" : "USER";
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -88,7 +97,7 @@
 </head>
 <body>
 
-<div class="container-sm" id="loginApp" data-role="<%= isAdminRole ? "ADMIN" : "USER" %>">
+<div class="container-sm" id="loginApp" data-role="<%= initialRoleStr %>">
     <div class="navbar-custom">
         <h2>E-Banking</h2>
         <div class="user-info">
@@ -99,16 +108,16 @@
 
     <div class="card">
         <div class="brand-header">
-            <h2 id="roleHeaderTitle"><%= isAdminRole ? "Administrator Sign In" : "Customer Sign In" %></h2>
-            <p id="roleSubtitle"><%= isAdminRole ? "Access the Bank Administrator Operations Portal" : "Access your Personal Internet Banking Account" %></p>
+            <h2 id="roleHeaderTitle"><%= headerTitle %></h2>
+            <p id="roleSubtitle"><%= headerSubtitle %></p>
         </div>
 
         <!-- Role Selector UI -->
         <div class="role-switch-container">
-            <button type="button" class="role-tab <%= !isAdminRole ? "active-user" : "" %>" id="btnRoleUser" onclick="setRole('USER')">
+            <button type="button" class="<%= userTabClass %>" id="btnRoleUser" onclick="setRole('USER')">
                 <span style="font-size: 1.15rem;">👤</span> Customer Login
             </button>
-            <button type="button" class="role-tab <%= isAdminRole ? "active-admin" : "" %>" id="btnRoleAdmin" onclick="setRole('ADMIN')">
+            <button type="button" class="<%= adminTabClass %>" id="btnRoleAdmin" onclick="setRole('ADMIN')">
                 <span style="font-size: 1.15rem;">🛡️</span> Bank Admin
             </button>
         </div>
@@ -133,11 +142,11 @@
         <% } %>
 
         <!-- Customer Login Form -->
-        <div id="customerSection" style="<%= isAdminRole ? "display: none;" : "display: block;" %>">
+        <div id="customerSection" style="<%= customerDisplayStyle %>">
             <form action="${pageContext.request.contextPath}/user/login" method="post">
                 <div class="form-group">
                     <label for="email">Customer Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="e.g. rahul@gmail.com" required <%= !isAdminRole ? "autofocus" : "" %>>
+                    <input type="email" id="email" name="email" placeholder="e.g. rahul@gmail.com" required>
                 </div>
 
                 <div class="form-group">
@@ -154,11 +163,11 @@
         </div>
 
         <!-- Bank Admin Login Form -->
-        <div id="adminSection" style="<%= isAdminRole ? "display: block;" : "display: none;" %>">
+        <div id="adminSection" style="<%= adminDisplayStyle %>">
             <form action="${pageContext.request.contextPath}/admin/login" method="post">
                 <div class="form-group">
                     <label for="adminUsername">Admin Email or Username</label>
-                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@gmail.com or admin" required <%= isAdminRole ? "autofocus" : "" %>>
+                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@gmail.com or admin" required>
                 </div>
 
                 <div class="form-group">
@@ -175,7 +184,7 @@
         </div>
 
         <div class="auth-links">
-            Don't have an account? <a href="${pageContext.request.contextPath}/register.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="registerLink">Register new account</a>
+            Don't have an account? <a href="<%= registerUrl %>" id="registerLink">Register new account</a>
         </div>
     </div>
 </div>
