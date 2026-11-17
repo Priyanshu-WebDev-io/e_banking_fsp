@@ -141,7 +141,7 @@
             </form>
 
             <div class="demo-box">
-                <strong>Demo Customer:</strong> <code>john.doe@example.com</code> / <code>password123</code>
+                <strong>Demo Customer:</strong> <code>rahul@gmail.com</code> / <code>user123</code>
             </div>
         </div>
 
@@ -162,7 +162,7 @@
             </form>
 
             <div class="demo-box">
-                <strong>Demo Admin:</strong> <code>admin</code> / <code>admin123</code>
+                <strong>Demo Admin:</strong> <code>admin@gmail.com</code> (or <code>admin</code>) / <code>admin123</code>
             </div>
         </div>
 

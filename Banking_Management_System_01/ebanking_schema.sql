@@ -53,17 +53,6 @@ CREATE TABLE IF NOT EXISTS accounts (
     CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- Sample Test User (Password: password123)
-INSERT INTO users (first_name, last_name, email, phone, password_hash, date_of_birth, address, city, state, pincode, status)
-VALUES ('John', 'Doe', 'john.doe@example.com', '9876543210', 'password123', '1995-05-15', '123 Main Street', 'Mumbai', 'Maharashtra', '400001', 'ACTIVE')
-ON DUPLICATE KEY UPDATE first_name = VALUES(first_name);
-
--- Sample Test Account
-INSERT INTO accounts (account_number, user_id, account_type, balance, branch_name, ifsc_code, status)
-SELECT '100100982341', user_id, 'SAVINGS', 25000.00, 'Main Branch - Mumbai', 'EBANK000101', 'ACTIVE'
-FROM users WHERE email = 'john.doe@example.com'
-ON DUPLICATE KEY UPDATE account_number = VALUES(account_number);
-
 -- =============================================
 -- 3. Admins Table (Admin Module)
 -- =============================================
@@ -76,8 +65,33 @@ CREATE TABLE IF NOT EXISTS admins (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Default Admin Account (Username: admin, Password: admin123)
-INSERT INTO admins (username, password_hash, full_name, email)
-VALUES ('admin', 'admin123', 'System Administrator', 'admin@ebanking.com')
+-- =============================================
+-- Mock Customers (Password for all: user123)
+-- =============================================
+INSERT INTO users (user_id, first_name, last_name, email, phone, password_hash, address, city, state, pincode, status)
+VALUES
+(1, 'Rahul', 'Sharma', 'rahul@gmail.com', '9876543210', 'user123', '42 MG Road', 'Mumbai', 'Maharashtra', '400001', 'ACTIVE'),
+(2, 'Priyanshu', 'Kumar', 'priyanshu@gmail.com', '9907500629', 'user123', '15 Brigade Road', 'Bengaluru', 'Karnataka', '560001', 'ACTIVE'),
+(3, 'Ananya', 'Patel', 'ananya@gmail.com', '9812345678', 'user123', '88 Park Avenue', 'Delhi', 'Delhi', '110001', 'ACTIVE')
+ON DUPLICATE KEY UPDATE first_name = VALUES(first_name);
+
+-- =============================================
+-- Mock Bank Accounts
+-- =============================================
+INSERT INTO accounts (account_id, account_number, user_id, account_type, balance, branch_name, ifsc_code, status)
+VALUES
+(1, '100100100101', 1, 'SAVINGS', 50000.00, 'Main Branch - Mumbai', 'EBANK000101', 'ACTIVE'),
+(2, '100100200202', 2, 'CURRENT', 85000.00, 'Indiranagar - Bengaluru', 'EBANK000201', 'ACTIVE'),
+(3, '100100300303', 3, 'SAVINGS', 25000.00, 'Connaught Place - Delhi', 'EBANK000301', 'ACTIVE')
+ON DUPLICATE KEY UPDATE balance = VALUES(balance);
+
+-- =============================================
+-- Mock Admins (Password for all: admin123)
+-- =============================================
+INSERT INTO admins (admin_id, username, email, full_name, password_hash)
+VALUES
+(1, 'admin', 'admin@gmail.com', 'System Administrator', 'admin123'),
+(2, 'priyanshu_admin', 'priyanshu.admin@gmail.com', 'Priyanshu (Admin)', 'admin123')
 ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
+
 
