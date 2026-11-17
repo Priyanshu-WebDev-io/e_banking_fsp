@@ -11,8 +11,8 @@
 
     String userTabClass = !isAdminRole ? "role-tab active-user" : "role-tab";
     String adminTabClass = isAdminRole ? "role-tab active-admin" : "role-tab";
-    String customerDisplayStyle = !isAdminRole ? "display: block;" : "display: none;";
-    String adminDisplayStyle = isAdminRole ? "display: block;" : "display: none;";
+    String customerHiddenClass = isAdminRole ? "hidden" : "";
+    String adminHiddenClass = !isAdminRole ? "hidden" : "";
     String headerTitle = isAdminRole ? "Create Administrator Account" : "Create Customer Account";
     String headerSubtitle = isAdminRole ? "Fill in administrator details to register your staff account" : "Fill in your details below to register your customer account";
     String loginUrl = request.getContextPath() + (isAdminRole ? "/login.jsp?role=admin" : "/login.jsp?role=user");
@@ -34,6 +34,9 @@
             margin-bottom: 24px;
             gap: 6px;
             border: 1px solid var(--border);
+        }
+        .hidden {
+            display: none !important;
         }
         .role-tab {
             flex: 1;
@@ -110,7 +113,7 @@
         <% } %>
 
         <!-- 1. Customer Registration Form -->
-        <div id="customerRegSection" style="<%= customerDisplayStyle %>">
+        <div id="customerRegSection" class="<%= customerHiddenClass %>">
             <form action="${pageContext.request.contextPath}/user/register" method="post" onsubmit="return validatePasswords('userPass', 'userConfirmPass')">
                 <div class="form-group">
                     <label for="userName">Full Name *</label>
@@ -137,7 +140,7 @@
         </div>
 
         <!-- 2. Admin Registration Form -->
-        <div id="adminRegSection" style="<%= adminDisplayStyle %>">
+        <div id="adminRegSection" class="<%= adminHiddenClass %>">
             <form action="${pageContext.request.contextPath}/admin/register" method="post" onsubmit="return validatePasswords('adminPass', 'adminConfirmPass')">
                 <div class="form-group">
                     <label for="adminName">Full Name *</label>
@@ -180,8 +183,14 @@
 
         var custSection = document.getElementById('customerRegSection');
         var admSection = document.getElementById('adminRegSection');
-        if (custSection) custSection.style.display = isAdm ? 'none' : 'block';
-        if (admSection) admSection.style.display = isAdm ? 'block' : 'none';
+        if (custSection) {
+            custSection.classList.toggle('hidden', isAdm);
+            custSection.style.display = isAdm ? 'none' : 'block';
+        }
+        if (admSection) {
+            admSection.classList.toggle('hidden', !isAdm);
+            admSection.style.display = isAdm ? 'block' : 'none';
+        }
 
         var regTitle = document.getElementById('regHeaderTitle');
         if (regTitle) {

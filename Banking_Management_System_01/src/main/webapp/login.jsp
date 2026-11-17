@@ -16,8 +16,8 @@
 
     String userTabClass = !isAdminRole ? "role-tab active-user" : "role-tab";
     String adminTabClass = isAdminRole ? "role-tab active-admin" : "role-tab";
-    String customerDisplayStyle = !isAdminRole ? "display: block;" : "display: none;";
-    String adminDisplayStyle = isAdminRole ? "display: block;" : "display: none;";
+    String customerHiddenClass = isAdminRole ? "hidden" : "";
+    String adminHiddenClass = !isAdminRole ? "hidden" : "";
     String headerTitle = isAdminRole ? "Administrator Sign In" : "Customer Sign In";
     String headerSubtitle = isAdminRole ? "Access the Bank Administrator Operations Portal" : "Access your Personal Internet Banking Account";
     String registerUrl = request.getContextPath() + (isAdminRole ? "/register.jsp?role=admin" : "/register.jsp?role=user");
@@ -39,6 +39,9 @@
             margin-bottom: 24px;
             gap: 6px;
             border: 1px solid var(--border);
+        }
+        .hidden {
+            display: none !important;
         }
         .role-tab {
             flex: 1;
@@ -142,7 +145,7 @@
         <% } %>
 
         <!-- Customer Login Form -->
-        <div id="customerSection" style="<%= customerDisplayStyle %>">
+        <div id="customerSection" class="<%= customerHiddenClass %>">
             <form action="${pageContext.request.contextPath}/user/login" method="post">
                 <div class="form-group">
                     <label for="email">Customer Email Address</label>
@@ -163,7 +166,7 @@
         </div>
 
         <!-- Bank Admin Login Form -->
-        <div id="adminSection" style="<%= adminDisplayStyle %>">
+        <div id="adminSection" class="<%= adminHiddenClass %>">
             <form action="${pageContext.request.contextPath}/admin/login" method="post">
                 <div class="form-group">
                     <label for="adminUsername">Admin Email or Username</label>
@@ -200,8 +203,14 @@
 
         var custSection = document.getElementById('customerSection');
         var admSection = document.getElementById('adminSection');
-        if (custSection) custSection.style.display = isAdm ? 'none' : 'block';
-        if (admSection) admSection.style.display = isAdm ? 'block' : 'none';
+        if (custSection) {
+            custSection.classList.toggle('hidden', isAdm);
+            custSection.style.display = isAdm ? 'none' : 'block';
+        }
+        if (admSection) {
+            admSection.classList.toggle('hidden', !isAdm);
+            admSection.style.display = isAdm ? 'block' : 'none';
+        }
 
         var roleTitle = document.getElementById('roleHeaderTitle');
         if (roleTitle) {
