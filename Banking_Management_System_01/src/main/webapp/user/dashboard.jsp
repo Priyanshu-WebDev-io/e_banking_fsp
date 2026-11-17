@@ -63,6 +63,12 @@
                         <p>Deposit funds, withdraw cash, and transfer money between accounts with live passbook</p>
                     </a>
 
+                    <a href="${pageContext.request.contextPath}/user/cards" class="dashboard-card">
+                        <div class="card-icon">🪪</div>
+                        <h3>My Cards</h3>
+                        <p>Manage virtual Debit & Credit cards, view masked numbers, and toggle security lock</p>
+                    </a>
+
                     <a href="${pageContext.request.contextPath}/user/logout" class="dashboard-card"
                         style="border-color: #ffcdd2;">
                         <div class="card-icon">🚪</div>

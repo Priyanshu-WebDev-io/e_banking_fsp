@@ -113,6 +113,25 @@ CREATE TABLE IF NOT EXISTS commissions (
 );
 
 -- =============================================
+-- 7. Cards Table (Cards Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS cards (
+    card_id INT PRIMARY KEY AUTO_INCREMENT,
+    card_number VARCHAR(25) NOT NULL UNIQUE,
+    card_type ENUM('DEBIT', 'CREDIT') NOT NULL DEFAULT 'DEBIT',
+    account_id INT NOT NULL,
+    user_id INT NOT NULL,
+    card_holder_name VARCHAR(100) NOT NULL,
+    expiry_date VARCHAR(7) NOT NULL,
+    cvv_hash VARCHAR(64) NOT NULL,
+    daily_limit DECIMAL(15, 2) DEFAULT 50000.00,
+    status ENUM('PENDING', 'ACTIVE', 'BLOCKED', 'CANCELLED') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cards_account FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cards_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- =============================================
 -- Mock Customers (Password for all: user123)
 -- =============================================
 INSERT INTO users (user_id, first_name, last_name, email, phone, password_hash, address, city, state, pincode, status)
@@ -152,5 +171,14 @@ VALUES
 (1, 'admin', 'admin@gmail.com', 'System Administrator', 'admin123'),
 (2, 'priyanshu_admin', 'priyanshu.admin@gmail.com', 'Priyanshu (Admin)', 'admin123')
 ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
+
+-- =============================================
+-- Mock Cards (Simulated Debit & Credit Cards)
+-- =============================================
+INSERT INTO cards (card_id, card_number, card_type, account_id, user_id, card_holder_name, expiry_date, cvv_hash, daily_limit, status)
+VALUES
+(1, '4532 8912 3456 7890', 'DEBIT', 1, 1, 'RAHUL SHARMA', '11/29', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 50000.00, 'ACTIVE'),
+(2, '5412 7634 9812 4321', 'CREDIT', 2, 2, 'PRIYANSHU KUMAR', '08/30', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 100000.00, 'ACTIVE')
+ON DUPLICATE KEY UPDATE card_number = VALUES(card_number);
 
 

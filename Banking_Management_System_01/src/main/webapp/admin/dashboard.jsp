@@ -19,6 +19,12 @@
 
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> transactions = (List<Map<String, Object>>) request.getAttribute("transactions");
+
+                Integer totalCards=(Integer) request.getAttribute("totalCards"); if (totalCards==null) totalCards=0;
+                Integer blockedCards=(Integer) request.getAttribute("blockedCards"); if (blockedCards==null) blockedCards=0;
+
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> cards = (List<Map<String, Object>>) request.getAttribute("cards");
                         %>
                         <!DOCTYPE html>
                         <html lang="en">
@@ -577,22 +583,75 @@
                                     </div>
 
                                     <!-- Cards Panel -->
-                                    <div class="card" id="cards">
-                                        <div class="section-header" style="margin-top: 0;">
-                                            <h3 style="font-size: 1.1rem;">🪪 Cards Management</h3>
-                                            <span class="module-tag module-tag-pending">Card Desk</span>
-                                        </div>
-                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
-                                            Debit and Credit cards issued across accounts with security masking
-                                            (<code>**** **** **** 1234</code>) and one-click blocking.
-                                        </p>
-                                        <div
-                                            style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
-                                            <strong>Total Cards Issued:</strong> 0 | <strong>Blocked Cards:</strong> 0
-                                        </div>
-                                    </div>
+        <div class="card" id="cards">
+            <div class="section-header" style="margin-top: 0;">
+                <h3 style="font-size: 1.15rem;">🪪 Cards Management (<%= totalCards %>)</h3>
+                <span class="badge" style="background: #eff6ff; color: #1e40af; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
+                    Active: <%= totalCards - blockedCards %> | Blocked: <%= blockedCards %>
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                Platform-wide customer Debit & Credit cards with masked representations and status monitoring.
+            </p>
 
-                                    <!-- Reports Panel -->
+            <div class="table-responsive">
+                <table class="data-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Cardholder & Account</th>
+                            <th>Holding Bank</th>
+                            <th>Masked Number</th>
+                            <th>Type</th>
+                            <th>Expires</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                        if (cards != null && !cards.isEmpty()) {
+                            for (Map<String, Object> card : cards) {
+                                String maskedNum = (String) card.get("maskedNumber");
+                                String cType = (String) card.get("cardType");
+                                String cHolder = (String) card.get("cardHolderName");
+                                String cExp = (String) card.get("expiryDate");
+                                String cStatus = (String) card.get("status");
+                                String cAcc = (String) card.get("accountNumber");
+                                String cBank = (String) card.get("bankName");
+                                boolean isCBlocked = "BLOCKED".equalsIgnoreCase(cStatus);
+                    %>
+                        <tr>
+                            <td>
+                                <strong><%= cHolder %></strong><br>
+                                <small style="color: var(--text-muted);">Acc #<%= cAcc %></small>
+                            </td>
+                            <td><small>🏛️ <%= cBank %></small></td>
+                            <td><code><%= maskedNum %></code></td>
+                            <td><span class="badge badge-type" style="font-size: 0.72rem;"><%= cType %></span></td>
+                            <td><%= cExp %></td>
+                            <td>
+                                <span class="badge <%= isCBlocked ? "badge-inactive" : "badge-active" %>" style="font-size: 0.72rem;">
+                                    <%= cStatus %>
+                                </span>
+                            </td>
+                        </tr>
+                    <%
+                            }
+                        } else {
+                    %>
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 16px; color: var(--text-muted);">
+                                No cards issued yet.
+                            </td>
+                        </tr>
+                    <%
+                        }
+                    %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Panel -->
                                     <div class="card" id="reports">
                                         <div class="section-header" style="margin-top: 0;">
                                             <h3 style="font-size: 1.1rem;">📊 Reports & Audit</h3>

@@ -37,12 +37,15 @@ public class AdminDashboardServlet extends HttpServlet {
         int totalAccounts = 0;
         int totalBanks = 0;
         int totalTransactions = 0;
+        int totalCards = 0;
+        int blockedCards = 0;
         BigDecimal totalDeposits = BigDecimal.ZERO;
         BigDecimal totalCommissions = BigDecimal.ZERO;
 
         List<Map<String, Object>> customers = new ArrayList<>();
         List<Map<String, Object>> accounts = new ArrayList<>();
         List<Map<String, Object>> transactions = new ArrayList<>();
+        List<Map<String, Object>> cards = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
 
@@ -88,6 +91,16 @@ public class AdminDashboardServlet extends HttpServlet {
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     totalCommissions = rs.getBigDecimal(1);
+                }
+            }
+
+            // 2d. Metric: Total Cards & Blocked Cards
+            String cardsMetricSql = "SELECT COUNT(*), COALESCE(SUM(CASE WHEN status = 'BLOCKED' THEN 1 ELSE 0 END), 0) FROM cards";
+            try (PreparedStatement ps = con.prepareStatement(cardsMetricSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalCards = rs.getInt(1);
+                    blockedCards = rs.getInt(2);
                 }
             }
 
@@ -186,6 +199,49 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
 
+            // 6. Cards Overview List
+            String cardsListSql = """
+                    SELECT c.card_id, c.card_number, c.card_type, c.card_holder_name,
+                           c.expiry_date, c.daily_limit, c.status, c.created_at,
+                           a.account_number, u.first_name, u.last_name, u.email,
+                           COALESCE(b.bank_name, 'Partner Bank') AS bank_name
+                    FROM cards c
+                    JOIN accounts a ON c.account_id = a.account_id
+                    JOIN users u ON c.user_id = u.user_id
+                    LEFT JOIN banks b ON a.bank_id = b.bank_id
+                    ORDER BY c.created_at DESC
+                    LIMIT 50
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(cardsListSql);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> card = new HashMap<>();
+                    card.put("cardId", rs.getInt("card_id"));
+                    String rawNum = rs.getString("card_number");
+                    card.put("cardNumber", rawNum);
+
+                    String masked = "**** **** **** ****";
+                    if (rawNum != null && rawNum.length() >= 16) {
+                        String[] parts = rawNum.split(" ");
+                        if (parts.length == 4) {
+                            masked = parts[0] + " •••• •••• " + parts[3];
+                        }
+                    }
+                    card.put("maskedNumber", masked);
+                    card.put("cardType", rs.getString("card_type"));
+                    card.put("cardHolderName", rs.getString("card_holder_name"));
+                    card.put("expiryDate", rs.getString("expiry_date"));
+                    card.put("dailyLimit", rs.getBigDecimal("daily_limit"));
+                    card.put("status", rs.getString("status"));
+                    card.put("createdAt", rs.getTimestamp("created_at"));
+                    card.put("accountNumber", rs.getString("account_number"));
+                    card.put("bankName", rs.getString("bank_name"));
+                    card.put("customerName", rs.getString("first_name") + " " + rs.getString("last_name"));
+                    card.put("customerEmail", rs.getString("email"));
+                    cards.add(card);
+                }
+            }
+
         } catch (SQLException e) {
             log("Error fetching admin dashboard data", e);
             request.setAttribute("dbError", "Unable to load dashboard data from database.");
@@ -195,11 +251,14 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("totalAccounts", totalAccounts);
         request.setAttribute("totalBanks", totalBanks);
         request.setAttribute("totalTransactions", totalTransactions);
+        request.setAttribute("totalCards", totalCards);
+        request.setAttribute("blockedCards", blockedCards);
         request.setAttribute("totalCommissions", totalCommissions != null ? totalCommissions : BigDecimal.ZERO);
         request.setAttribute("totalDeposits", totalDeposits != null ? totalDeposits : BigDecimal.ZERO);
         request.setAttribute("customers", customers);
         request.setAttribute("accounts", accounts);
         request.setAttribute("transactions", transactions);
+        request.setAttribute("cards", cards);
 
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
