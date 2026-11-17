@@ -63,3 +63,21 @@ INSERT INTO accounts (account_number, user_id, account_type, balance, branch_nam
 SELECT '100100982341', user_id, 'SAVINGS', 25000.00, 'Main Branch - Mumbai', 'EBANK000101', 'ACTIVE'
 FROM users WHERE email = 'john.doe@example.com'
 ON DUPLICATE KEY UPDATE account_number = VALUES(account_number);
+
+-- =============================================
+-- 3. Admins Table (Admin Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS admins (
+    admin_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Default Admin Account (Username: admin, Password: admin123)
+INSERT INTO admins (username, password_hash, full_name, email)
+VALUES ('admin', 'admin123', 'System Administrator', 'admin@ebanking.com')
+ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
+

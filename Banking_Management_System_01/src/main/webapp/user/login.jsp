@@ -15,6 +15,7 @@
         <div class="user-info">
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
             <a href="register.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Register</a>
+            <a href="${pageContext.request.contextPath}/admin/login.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🛡️ Admin Login</a>
         </div>
     </div>
 
@@ -60,6 +61,9 @@
 
         <div class="auth-links">
             Don't have an account? <a href="register.jsp">Create new account</a>
+            <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 0.85rem;">
+                Bank Official? <a href="${pageContext.request.contextPath}/admin/login.jsp">Admin Portal Login</a>
+            </div>
         </div>
     </div>
 </div>
