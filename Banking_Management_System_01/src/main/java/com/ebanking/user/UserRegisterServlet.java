@@ -21,7 +21,7 @@ public class UserRegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/user/register.jsp");
+        response.sendRedirect(request.getContextPath() + "/register.jsp");
     }
 
     @Override
@@ -49,7 +49,8 @@ public class UserRegisterServlet extends HttpServlet {
             password == null || password.trim().isEmpty()) {
 
             request.setAttribute("error", "All required fields must be filled out.");
-            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            request.setAttribute("selectedRole", "USER");
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
 
@@ -83,10 +84,11 @@ public class UserRegisterServlet extends HttpServlet {
             int rows = ps.executeUpdate();
 
             if (rows > 0) {
-                response.sendRedirect(request.getContextPath() + "/user/login.jsp?registered=true");
+                response.sendRedirect(request.getContextPath() + "/login.jsp?registered=true&role=user");
             } else {
                 request.setAttribute("error", "Registration failed. Please try again.");
-                request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+                request.setAttribute("selectedRole", "USER");
+                request.getRequestDispatcher("/register.jsp").forward(request, response);
             }
 
         } catch (SQLException e) {
@@ -98,7 +100,8 @@ public class UserRegisterServlet extends HttpServlet {
                 errorMsg = "Database error: " + e.getMessage();
             }
             request.setAttribute("error", errorMsg);
-            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            request.setAttribute("selectedRole", "USER");
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
         }
     }
 }

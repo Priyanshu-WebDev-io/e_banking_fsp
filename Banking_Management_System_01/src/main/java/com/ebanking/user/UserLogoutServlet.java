@@ -22,7 +22,7 @@ public class UserLogoutServlet extends HttpServlet {
             session.invalidate();
         }
 
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login.jsp?loggedOut=true&role=user");
     }
 
     @Override

@@ -23,7 +23,7 @@ public class UserLoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login.jsp");
     }
 
     @Override
@@ -39,7 +39,8 @@ public class UserLoginServlet extends HttpServlet {
             password == null || password.trim().isEmpty()) {
 
             request.setAttribute("error", "Please enter both email and password.");
-            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            request.setAttribute("selectedRole", "USER");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
 
@@ -104,14 +105,16 @@ public class UserLoginServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/user/dashboard.jsp");
                 } else {
                     request.setAttribute("error", "Invalid email or password, or account is inactive.");
-                    request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+                    request.setAttribute("selectedRole", "USER");
+                    request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("error", "Database connection error: " + e.getMessage());
-            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            request.setAttribute("selectedRole", "USER");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
 }

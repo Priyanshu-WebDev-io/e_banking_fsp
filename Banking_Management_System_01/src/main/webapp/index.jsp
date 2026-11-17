@@ -180,17 +180,13 @@
                         </a>
                     </div>
                 <% } else { %>
-                    <!-- Guest Controls: User Login, Register & Admin Login -->
+                    <!-- Guest Controls: Simple Login / Register Buttons -->
                     <div class="d-flex align-items-center gap-2">
-                        <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning fw-bold px-3 shadow-sm">
+                        <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-warning fw-bold px-3 shadow-sm">
                             <i class="bi bi-box-arrow-in-right"></i> Login
                         </a>
-                        <a href="${pageContext.request.contextPath}/user/register.jsp" class="btn btn-light fw-bold px-3 shadow-sm text-primary">
+                        <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-light fw-bold px-3 shadow-sm text-primary">
                             <i class="bi bi-person-plus-fill"></i> Register
-                        </a>
-                        <!-- Admin Login Section in Navbar -->
-                        <a href="${pageContext.request.contextPath}/admin/login.jsp" class="btn btn-outline-light fw-semibold px-3 shadow-sm">
-                            <i class="bi bi-shield-lock-fill text-warning"></i> Admin Login
                         </a>
                     </div>
                 <% } %>
@@ -236,14 +232,11 @@
                                 <i class="bi bi-wallet2"></i> View Accounts
                             </a>
                         <% } else { %>
-                            <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning btn-lg fw-bold px-4 shadow">
-                                <i class="bi bi-box-arrow-in-right"></i> Customer Login
+                            <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-warning btn-lg fw-bold px-4 shadow">
+                                <i class="bi bi-box-arrow-in-right"></i> Sign In / Login
                             </a>
-                            <a href="${pageContext.request.contextPath}/user/register.jsp" class="btn btn-light btn-lg fw-bold px-4 text-primary shadow">
-                                <i class="bi bi-person-plus"></i> Open Account
-                            </a>
-                            <a href="${pageContext.request.contextPath}/admin/login.jsp" class="btn btn-outline-light btn-lg fw-semibold px-4">
-                                <i class="bi bi-shield-lock-fill text-warning"></i> Admin Portal
+                            <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-light btn-lg fw-bold px-4 text-primary shadow">
+                                <i class="bi bi-person-plus"></i> Open Account / Register
                             </a>
                         <% } %>
                     </div>
@@ -264,7 +257,7 @@
             <div class="row g-4">
                 <!-- 1. User Authentication Module -->
                 <div class="col-md-4">
-                    <a href="<%= isUser ? "user/dashboard.jsp" : "user/login.jsp" %>" class="feature-card">
+                    <a href="<%= isUser ? "user/dashboard.jsp" : "login.jsp" %>" class="feature-card">
                         <div class="feature-icon bg-primary bg-opacity-10 text-primary">
                             <i class="bi bi-person-lock"></i>
                         </div>
@@ -347,11 +340,9 @@
                     <span class="text-white-50">&bull;</span>
                     <a href="${pageContext.request.contextPath}/admin/logout" class="text-white-50 text-decoration-none">Admin Logout</a>
                 <% } else { %>
-                    <a href="${pageContext.request.contextPath}/user/login.jsp" class="text-white-50 text-decoration-none">User Login</a>
+                    <a href="${pageContext.request.contextPath}/login.jsp" class="text-white-50 text-decoration-none">Login</a>
                     <span class="text-white-50">&bull;</span>
-                    <a href="${pageContext.request.contextPath}/user/register.jsp" class="text-white-50 text-decoration-none">Register</a>
-                    <span class="text-white-50">&bull;</span>
-                    <a href="${pageContext.request.contextPath}/admin/login.jsp" class="text-white-50 text-decoration-none">Admin Login</a>
+                    <a href="${pageContext.request.contextPath}/register.jsp" class="text-white-50 text-decoration-none">Register</a>
                 <% } %>
             </div>
         </div>
