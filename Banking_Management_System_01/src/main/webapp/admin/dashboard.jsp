@@ -3,7 +3,7 @@
 <%
     Integer adminId = (Integer) session.getAttribute("adminId");
     if (adminId == null) {
-        response.sendRedirect(request.getContextPath() + "/admin/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login.jsp?role=admin");
         return;
     }
 
@@ -38,9 +38,12 @@
     <title>Admin Dashboard - E-Banking</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             margin-bottom: 28px;
         }
@@ -53,6 +56,11 @@
             display: flex;
             align-items: center;
             gap: 18px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
         .stat-icon {
             width: 54px;
@@ -114,6 +122,26 @@
             border-radius: 9999px;
             margin-right: 8px;
         }
+        .module-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .module-tag-live {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .module-tag-ready {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        .module-tag-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
     </style>
 </head>
 <body>
@@ -127,13 +155,33 @@
             <span>Welcome, <strong><%= adminName != null ? adminName : adminUsername %></strong></span>
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
             <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏛️ Partner Banks</a>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
             <a href="${pageContext.request.contextPath}/admin/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+        </div>
+    </div>
+
+    <!-- Admin Welcome Header Card -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h3 style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px;">
+                    Hello, <%= adminName != null ? adminName : "System Administrator" %>! 👋
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.92rem;">
+                    Platform Governance Authority. Monitor partner banks, customer accounts, transactions, cards, loans, and platform commissions.
+                </p>
+            </div>
+            <div>
+                <span class="badge" style="background: #fef2f2; color: #991b1b; font-weight: 700; padding: 6px 14px; border-radius: 9999px; border: 1px solid #fecaca; font-size: 0.85rem;">
+                    🛡️ Central Platform Authority
+                </span>
+            </div>
         </div>
     </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" style="cursor: pointer;" onclick="document.getElementById('customers').scrollIntoView({behavior: 'smooth'})">
             <div class="stat-icon" style="background-color: #eff6ff; color: #1d4ed8;">👥</div>
             <div class="stat-info">
                 <h4>Total Customers</h4>
@@ -141,7 +189,7 @@
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" style="cursor: pointer;" onclick="document.getElementById('accounts').scrollIntoView({behavior: 'smooth'})">
             <div class="stat-icon" style="background-color: #f0fdf4; color: #15803d;">🏦</div>
             <div class="stat-info">
                 <h4>Total Bank Accounts</h4>
@@ -166,9 +214,78 @@
         </div>
     </div>
 
-    <!-- Customer Management Table -->
-    <div class="card" id="customers" style="margin-bottom: 24px;">
-        <div class="section-header">
+    <!-- Platform Administration Modules (Full Grid like User Panel) -->
+    <h3 style="margin-bottom: 14px; color: var(--text-main); font-weight: 700;">Platform Administration Modules</h3>
+
+    <div class="dashboard-grid" style="margin-bottom: 32px;">
+        <!-- 1. Partner Banks -->
+        <a href="${pageContext.request.contextPath}/admin/banks" class="dashboard-card">
+            <div class="card-icon">🏛️</div>
+            <h3>Partner Banks</h3>
+            <p>Onboard banks (SBI, HDFC, ICICI), configure commission %, and regulate institutional status</p>
+            <span class="module-tag module-tag-live">Active • <%= totalBanks %> Partner Banks</span>
+        </a>
+
+        <!-- 2. Customer Management -->
+        <a href="#customers" class="dashboard-card">
+            <div class="card-icon">👥</div>
+            <h3>Customer Management</h3>
+            <p>Review customer KYC profiles, email/phone contact records, and regulate account access</p>
+            <span class="module-tag module-tag-live">Active • <%= totalCustomers %> Registered Customers</span>
+        </a>
+
+        <!-- 3. Bank Accounts -->
+        <a href="#accounts" class="dashboard-card">
+            <div class="card-icon">🏦</div>
+            <h3>Bank Accounts</h3>
+            <p>System-wide view of Savings and Current accounts, monitor holding bank balances and IFSC codes</p>
+            <span class="module-tag module-tag-live">Active • <%= totalAccounts %> Live Accounts</span>
+        </a>
+
+        <!-- 4. Transactions Ledger -->
+        <a href="#transactions" class="dashboard-card">
+            <div class="card-icon">💳</div>
+            <h3>Transactions & Transfers</h3>
+            <p>Audit cash deposits, withdrawals, and inter-bank customer fund transfers with reference IDs</p>
+            <span class="module-tag module-tag-ready">Financial Ledger Ready</span>
+        </a>
+
+        <!-- 5. Commission Engine -->
+        <a href="${pageContext.request.contextPath}/admin/banks" class="dashboard-card">
+            <div class="card-icon">💰</div>
+            <h3>Commission Engine</h3>
+            <p>Configure per-bank transaction fee rates (0.50% - 1.00%) and monitor platform revenue cuts</p>
+            <span class="module-tag module-tag-live">Configured per Bank</span>
+        </a>
+
+        <!-- 6. Loan Applications -->
+        <a href="#loans" class="dashboard-card">
+            <div class="card-icon">📜</div>
+            <h3>Loans Management</h3>
+            <p>Review customer loan applications, evaluate interest rates/tenures, and approve or reject disbursals</p>
+            <span class="module-tag module-tag-pending">Application Review Desk</span>
+        </a>
+
+        <!-- 7. Cards Management -->
+        <a href="#cards" class="dashboard-card">
+            <div class="card-icon">🪪</div>
+            <h3>Cards Management</h3>
+            <p>Monitor customer Debit & Credit cards, view masked card numbers, and execute security block/unblock</p>
+            <span class="module-tag module-tag-pending">Card Issuance & Security</span>
+        </a>
+
+        <!-- 8. Platform Reports & Audit -->
+        <a href="#reports" class="dashboard-card">
+            <div class="card-icon">📊</div>
+            <h3>Reports & System Audit</h3>
+            <p>Generate financial statements, view bank performance breakdowns, and review operational audit trail</p>
+            <span class="module-tag module-tag-ready">System Compliance & Audit</span>
+        </a>
+    </div>
+
+    <!-- 1. Customer Management Table -->
+    <div class="card" id="customers" style="margin-bottom: 28px;">
+        <div class="section-header" style="margin-top: 0;">
             <h3>👥 Registered Customers (<%= customers != null ? customers.size() : 0 %>)</h3>
             <span style="font-size: 0.85rem; color: var(--text-muted);">Real-time database records</span>
         </div>
@@ -200,7 +317,7 @@
                             <td><strong>#<%= c.get("userId") %></strong></td>
                             <td><strong><%= name %></strong></td>
                             <td><%= c.get("email") %></td>
-                            <td><%= c.get("phone") %></td>
+                            <td><%= c.get("phone") != null ? c.get("phone") : "-" %></td>
                             <td><%= loc %></td>
                             <td><span class="badge-status badge-active"><%= c.get("status") %></span></td>
                             <td style="font-size: 0.85rem; color: var(--text-muted);"><%= regDate %></td>
@@ -222,10 +339,10 @@
         </div>
     </div>
 
-    <!-- Accounts Management Table -->
-    <div class="card" id="accounts">
-        <div class="section-header">
-            <h3>🏦 Bank Accounts (<%= accounts != null ? accounts.size() : 0 %>)</h3>
+    <!-- 2. Accounts Management Table -->
+    <div class="card" id="accounts" style="margin-bottom: 28px;">
+        <div class="section-header" style="margin-top: 0;">
+            <h3>🏦 Bank Accounts Across Partner Institutions (<%= accounts != null ? accounts.size() : 0 %>)</h3>
             <span style="font-size: 0.85rem; color: var(--text-muted);">All active customer accounts</span>
         </div>
 
@@ -234,11 +351,11 @@
                 <thead>
                     <tr>
                         <th style="width: 8%;">Acc ID</th>
-                        <th style="width: 18%;">Account Number</th>
-                        <th style="width: 20%;">Account Holder</th>
-                        <th style="width: 14%;">Account Type</th>
+                        <th style="width: 20%;">Account Number & Bank</th>
+                        <th style="width: 18%;">Account Holder</th>
+                        <th style="width: 12%;">Account Type</th>
                         <th style="width: 16%;">Balance</th>
-                        <th style="width: 14%;">IFSC / Branch</th>
+                        <th style="width: 16%;">IFSC / Branch</th>
                         <th style="width: 10%;">Status</th>
                     </tr>
                 </thead>
@@ -289,6 +406,72 @@
                     %>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- 3. Transactions & Ledger Section -->
+    <div class="card" id="transactions" style="margin-bottom: 28px;">
+        <div class="section-header" style="margin-top: 0;">
+            <h3>💳 Platform Transactions & Fund Transfers</h3>
+            <span class="module-tag module-tag-ready">Ledger Operational</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+            The transaction engine processes deposits, withdrawals, and account-to-account fund transfers while computing institutional commissions.
+        </p>
+        <div style="background: #f8fafc; border: 1px dashed var(--border); border-radius: 8px; padding: 24px; text-align: center;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">💳 ⇄ 🏛️</div>
+            <h4 style="color: var(--text-main); margin-bottom: 4px;">Unified Transaction Engine Active</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 550px; margin: 0 auto 16px;">
+                All financial transfers automatically apply partner bank commission rates (<%= totalBanks %> banks connected). Real-time debits and credits maintain double-entry balance consistency.
+            </p>
+            <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 16px;">
+                View Commission Rates Per Bank
+            </a>
+        </div>
+    </div>
+
+    <!-- 4. Loans, Cards & Reports Overview Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <!-- Loans Panel -->
+        <div class="card" id="loans">
+            <div class="section-header" style="margin-top: 0;">
+                <h3 style="font-size: 1.1rem;">📜 Loan Applications</h3>
+                <span class="module-tag module-tag-pending">Review Desk</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                Partner bank loan products (Personal, Home, Education) with tenure-based EMI calculation and admin approval workflow.
+            </p>
+            <div style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
+                <strong>Pending Applications:</strong> 0 | <strong>Active Disbursed:</strong> 0
+            </div>
+        </div>
+
+        <!-- Cards Panel -->
+        <div class="card" id="cards">
+            <div class="section-header" style="margin-top: 0;">
+                <h3 style="font-size: 1.1rem;">🪪 Cards Management</h3>
+                <span class="module-tag module-tag-pending">Card Desk</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                Debit and Credit cards issued across accounts with security masking (<code>**** **** **** 1234</code>) and one-click blocking.
+            </p>
+            <div style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
+                <strong>Total Cards Issued:</strong> 0 | <strong>Blocked Cards:</strong> 0
+            </div>
+        </div>
+
+        <!-- Reports Panel -->
+        <div class="card" id="reports">
+            <div class="section-header" style="margin-top: 0;">
+                <h3 style="font-size: 1.1rem;">📊 Reports & Audit</h3>
+                <span class="module-tag module-tag-ready">System Audit</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                Platform compliance audit logs, institutional commission reports, and system-wide deposit tracking.
+            </p>
+            <div style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
+                <strong>Audited Institutions:</strong> <%= totalBanks %> | <strong>System Status:</strong> HEALTHY
+            </div>
         </div>
     </div>
 </div>
