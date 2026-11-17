@@ -192,6 +192,9 @@
                 <a href="${pageContext.request.contextPath}/account/details?accountNumber=<%= accNum %>" class="btn btn-outline" style="flex: 1;">
                     View Details
                 </a>
+                <a href="${pageContext.request.contextPath}/user/transactions?accountNumber=<%= accNum %>" class="btn btn-primary" style="flex: 1;">
+                    💳 Transfers & Passbook
+                </a>
                 <a href="${pageContext.request.contextPath}/account/create" class="btn btn-secondary" style="flex: 1;">
                     + Open Another
                 </a>

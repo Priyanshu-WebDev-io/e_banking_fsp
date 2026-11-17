@@ -91,7 +91,8 @@
         </div>
 
         <div class="actions-bar">
-            <a href="${pageContext.request.contextPath}/account/list" class="btn btn-primary" style="flex: 1;">&larr; Back to Accounts</a>
+            <a href="${pageContext.request.contextPath}/account/list" class="btn btn-secondary" style="flex: 1;">&larr; Back to Accounts</a>
+            <a href="${pageContext.request.contextPath}/user/transactions?accountNumber=<%= accountNumber %>" class="btn btn-primary" style="flex: 1;">💳 View Passbook & Transfers</a>
             <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-secondary" style="flex: 1;">Dashboard</a>
         </div>
     </div>

@@ -82,6 +82,37 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 -- =============================================
+-- 5. Transactions Table (Transactions Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    reference_number VARCHAR(30) NOT NULL UNIQUE,
+    from_account_id INT NULL,
+    to_account_id INT NULL,
+    amount DECIMAL(15, 2) NOT NULL,
+    transaction_type ENUM('DEPOSIT', 'WITHDRAWAL', 'TRANSFER') NOT NULL,
+    status ENUM('SUCCESS', 'FAILED', 'PENDING') DEFAULT 'SUCCESS',
+    description VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_trans_from FOREIGN KEY (from_account_id) REFERENCES accounts(account_id) ON DELETE SET NULL,
+    CONSTRAINT fk_trans_to FOREIGN KEY (to_account_id) REFERENCES accounts(account_id) ON DELETE SET NULL
+);
+
+-- =============================================
+-- 6. Commissions Table (Commission Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS commissions (
+    commission_id INT PRIMARY KEY AUTO_INCREMENT,
+    bank_id INT NOT NULL,
+    transaction_id INT NOT NULL,
+    commission_rate DECIMAL(5, 2) NOT NULL,
+    commission_amount DECIMAL(15, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_comm_bank FOREIGN KEY (bank_id) REFERENCES banks(bank_id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_trans FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE
+);
+
+-- =============================================
 -- Mock Customers (Password for all: user123)
 -- =============================================
 INSERT INTO users (user_id, first_name, last_name, email, phone, password_hash, address, city, state, pincode, status)

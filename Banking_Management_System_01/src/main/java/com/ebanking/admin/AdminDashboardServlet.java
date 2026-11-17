@@ -36,10 +36,13 @@ public class AdminDashboardServlet extends HttpServlet {
         int totalCustomers = 0;
         int totalAccounts = 0;
         int totalBanks = 0;
+        int totalTransactions = 0;
         BigDecimal totalDeposits = BigDecimal.ZERO;
+        BigDecimal totalCommissions = BigDecimal.ZERO;
 
         List<Map<String, Object>> customers = new ArrayList<>();
         List<Map<String, Object>> accounts = new ArrayList<>();
+        List<Map<String, Object>> transactions = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
 
@@ -68,6 +71,23 @@ public class AdminDashboardServlet extends HttpServlet {
                  ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     totalBanks = rs.getInt(1);
+                }
+            }
+
+            // 2c. Metric: Total Transactions & Total Commission Revenue
+            String transMetricSql = "SELECT COUNT(*) FROM transactions";
+            try (PreparedStatement ps = con.prepareStatement(transMetricSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalTransactions = rs.getInt(1);
+                }
+            }
+
+            String commMetricSql = "SELECT COALESCE(SUM(commission_amount), 0) FROM commissions";
+            try (PreparedStatement ps = con.prepareStatement(commMetricSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalCommissions = rs.getBigDecimal(1);
                 }
             }
 
@@ -126,6 +146,46 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
 
+            // 5. Recent Platform Transactions with Bank Commission Info
+            String transactionsSql = """
+                    SELECT t.transaction_id, t.reference_number, t.amount, t.transaction_type,
+                           t.status, t.description, t.created_at,
+                           fa.account_number AS from_account_number,
+                           ta.account_number AS to_account_number,
+                           COALESCE(fb.bank_name, 'Partner Bank') AS from_bank_name,
+                           COALESCE(tb.bank_name, 'Partner Bank') AS to_bank_name,
+                           COALESCE(c.commission_amount, 0) AS commission_amount,
+                           COALESCE(c.commission_rate, 0) AS commission_rate
+                    FROM transactions t
+                    LEFT JOIN accounts fa ON t.from_account_id = fa.account_id
+                    LEFT JOIN banks fb ON fa.bank_id = fb.bank_id
+                    LEFT JOIN accounts ta ON t.to_account_id = ta.account_id
+                    LEFT JOIN banks tb ON ta.bank_id = tb.bank_id
+                    LEFT JOIN commissions c ON t.transaction_id = c.transaction_id
+                    ORDER BY t.created_at DESC
+                    LIMIT 50
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(transactionsSql);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> t = new HashMap<>();
+                    t.put("transactionId", rs.getInt("transaction_id"));
+                    t.put("referenceNumber", rs.getString("reference_number"));
+                    t.put("amount", rs.getBigDecimal("amount"));
+                    t.put("transactionType", rs.getString("transaction_type"));
+                    t.put("status", rs.getString("status"));
+                    t.put("description", rs.getString("description"));
+                    t.put("createdAt", rs.getTimestamp("created_at"));
+                    t.put("fromAccountNumber", rs.getString("from_account_number"));
+                    t.put("toAccountNumber", rs.getString("to_account_number"));
+                    t.put("fromBankName", rs.getString("from_bank_name"));
+                    t.put("toBankName", rs.getString("to_bank_name"));
+                    t.put("commissionAmount", rs.getBigDecimal("commission_amount"));
+                    t.put("commissionRate", rs.getBigDecimal("commission_rate"));
+                    transactions.add(t);
+                }
+            }
+
         } catch (SQLException e) {
             log("Error fetching admin dashboard data", e);
             request.setAttribute("dbError", "Unable to load dashboard data from database.");
@@ -134,9 +194,12 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("totalCustomers", totalCustomers);
         request.setAttribute("totalAccounts", totalAccounts);
         request.setAttribute("totalBanks", totalBanks);
+        request.setAttribute("totalTransactions", totalTransactions);
+        request.setAttribute("totalCommissions", totalCommissions != null ? totalCommissions : BigDecimal.ZERO);
         request.setAttribute("totalDeposits", totalDeposits != null ? totalDeposits : BigDecimal.ZERO);
         request.setAttribute("customers", customers);
         request.setAttribute("accounts", accounts);
+        request.setAttribute("transactions", transactions);
 
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
