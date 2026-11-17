@@ -50,13 +50,15 @@ public class AdminLoginServlet extends HttpServlet {
         String sql = """
                 SELECT admin_id, username, password_hash, full_name, email
                 FROM admins
-                WHERE username = ?
+                WHERE username = ? OR email = ?
                 """;
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, username.trim());
+            String identifier = username.trim();
+            ps.setString(1, identifier);
+            ps.setString(2, identifier);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

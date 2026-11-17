@@ -149,8 +149,8 @@
         <div id="adminSection" style="<%= isAdminRole ? "display: block;" : "display: none;" %>">
             <form action="${pageContext.request.contextPath}/admin/login" method="post">
                 <div class="form-group">
-                    <label for="adminUsername">Admin Username</label>
-                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin" required <%= isAdminRole ? "autofocus" : "" %>>
+                    <label for="adminUsername">Admin Email or Username</label>
+                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@ebanking.com or admin" required <%= isAdminRole ? "autofocus" : "" %>>
                 </div>
 
                 <div class="form-group">

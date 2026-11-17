@@ -16,8 +16,6 @@ import java.sql.SQLException;
 @WebServlet("/admin/register")
 public class AdminRegisterServlet extends HttpServlet {
 
-    private static final String ADMIN_SECRET_KEY = "ADMIN2026";
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -30,42 +28,50 @@ public class AdminRegisterServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String fullName = request.getParameter("fullName");
-        String username = request.getParameter("username");
+        String name = request.getParameter("name");
+        if (name == null || name.trim().isEmpty()) {
+            name = request.getParameter("fullName");
+        }
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String adminKey = request.getParameter("adminKey");
+        String confirmPassword = request.getParameter("confirmPassword");
 
-        if (fullName == null || fullName.trim().isEmpty() ||
-            username == null || username.trim().isEmpty() ||
+        if (name == null || name.trim().isEmpty() ||
+            email == null || email.trim().isEmpty() ||
             password == null || password.trim().isEmpty()) {
 
-            request.setAttribute("error", "Full name, admin username, and password are required.");
+            request.setAttribute("error", "Name, email, and password are required.");
             request.setAttribute("selectedRole", "ADMIN");
             request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
 
-        // Validate admin secret authorization key
-        if (adminKey == null || !ADMIN_SECRET_KEY.equalsIgnoreCase(adminKey.trim())) {
-            request.setAttribute("error", "Invalid Admin Security Key. Use the authorized system key (ADMIN2026).");
+        if (confirmPassword != null && !confirmPassword.trim().isEmpty() && !password.equals(confirmPassword)) {
+            request.setAttribute("error", "Password and Confirm Password do not match.");
             request.setAttribute("selectedRole", "ADMIN");
             request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
+
+        email = email.trim();
+        name = name.trim();
+
+        // Generate username from email (e.g. "admin_john" from "admin_john@domain.com")
+        String username = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
 
         String sql = """
-                INSERT INTO admins (username, password_hash, full_name, email)
+                INSERT INTO admins (full_name, email, username, password_hash)
                 VALUES (?, ?, ?, ?)
                 """;
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, username.trim());
-            ps.setString(2, password); // Raw password in line with project specification
-            ps.setString(3, fullName.trim());
-            ps.setString(4, (email != null && !email.trim().isEmpty()) ? email.trim() : null);
+            ps.setString(1, name);
+            ps.setString(2, email);
+            ps.setString(3, username);
+            ps.setString(4, password);
 
             int rows = ps.executeUpdate();
             if (rows > 0) {
@@ -80,7 +86,7 @@ public class AdminRegisterServlet extends HttpServlet {
             log("Admin registration error", e);
             String errorMsg = "Admin registration failed.";
             if (e.getErrorCode() == 1062 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("duplicate"))) {
-                errorMsg = "An administrator account with this username or email already exists.";
+                errorMsg = "An administrator account with this email already exists.";
             } else {
                 errorMsg = "Database error: " + e.getMessage();
             }

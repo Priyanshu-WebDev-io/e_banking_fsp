@@ -10,10 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 
 @WebServlet("/user/register")
 public class UserRegisterServlet extends HttpServlet {
@@ -21,7 +19,7 @@ public class UserRegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getContextPath() + "/register.jsp");
+        response.sendRedirect(request.getContextPath() + "/register.jsp?role=user");
     }
 
     @Override
@@ -30,56 +28,57 @@ public class UserRegisterServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String password = request.getParameter("password");
-        String dateOfBirth = request.getParameter("dateOfBirth");
-        String address = request.getParameter("address");
-        String city = request.getParameter("city");
-        String state = request.getParameter("state");
-        String pincode = request.getParameter("pincode");
+        String name = request.getParameter("name");
+        if (name == null || name.trim().isEmpty()) {
+            String f = request.getParameter("firstName");
+            String l = request.getParameter("lastName");
+            name = (f != null ? f.trim() : "") + (l != null ? " " + l.trim() : "");
+        }
 
-        // Basic validation for required fields
-        if (firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty() ||
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
+
+        // Basic validation for required fields: name, email, password, confirmPassword
+        if (name == null || name.trim().isEmpty() ||
             email == null || email.trim().isEmpty() ||
-            phone == null || phone.trim().isEmpty() ||
             password == null || password.trim().isEmpty()) {
 
-            request.setAttribute("error", "All required fields must be filled out.");
+            request.setAttribute("error", "Name, email, and password are required.");
             request.setAttribute("selectedRole", "USER");
             request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
 
+        // Validate password confirmation if provided
+        if (confirmPassword != null && !confirmPassword.trim().isEmpty() && !password.equals(confirmPassword)) {
+            request.setAttribute("error", "Password and Confirm Password do not match.");
+            request.setAttribute("selectedRole", "USER");
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
+            return;
+        }
+
+        name = name.trim();
+        String firstName = name;
+        String lastName = "";
+        int spaceIdx = name.indexOf(' ');
+        if (spaceIdx > 0) {
+            firstName = name.substring(0, spaceIdx).trim();
+            lastName = name.substring(spaceIdx + 1).trim();
+        }
+
         String sql = """
-                INSERT INTO users
-                (first_name, last_name, email, phone, password_hash,
-                 date_of_birth, address, city, state, pincode)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users (first_name, last_name, email, password_hash)
+                VALUES (?, ?, ?, ?)
                 """;
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, firstName.trim());
-            ps.setString(2, lastName.trim());
+            ps.setString(1, firstName);
+            ps.setString(2, lastName);
             ps.setString(3, email.trim());
-            ps.setString(4, phone.trim());
-            ps.setString(5, password); // Raw for now, can be hashed with BCrypt later
-
-            if (dateOfBirth == null || dateOfBirth.trim().isEmpty()) {
-                ps.setNull(6, Types.DATE);
-            } else {
-                ps.setDate(6, Date.valueOf(dateOfBirth.trim()));
-            }
-
-            ps.setString(7, address != null ? address.trim() : null);
-            ps.setString(8, city != null ? city.trim() : null);
-            ps.setString(9, state != null ? state.trim() : null);
-            ps.setString(10, pincode != null ? pincode.trim() : null);
+            ps.setString(4, password);
 
             int rows = ps.executeUpdate();
 
@@ -92,10 +91,10 @@ public class UserRegisterServlet extends HttpServlet {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log("User registration error", e);
             String errorMsg = "Registration failed.";
-            if (e.getErrorCode() == 1062 || e.getMessage().toLowerCase().contains("duplicate")) {
-                errorMsg = "Registration failed: An account with this email or phone already exists.";
+            if (e.getErrorCode() == 1062 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("duplicate"))) {
+                errorMsg = "An account with this email address already exists. Please login instead.";
             } else {
                 errorMsg = "Database error: " + e.getMessage();
             }

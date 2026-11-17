@@ -64,23 +64,11 @@
             background-color: #7f1d1d;
             color: #ffffff;
         }
-        .security-badge {
-            display: inline-block;
-            background-color: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            margin-bottom: 16px;
-            width: 100%;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container-sm">
     <div class="navbar-custom">
         <h2>E-Banking</h2>
         <div class="user-info">
@@ -92,16 +80,16 @@
     <div class="card">
         <div class="brand-header">
             <h2 id="regHeaderTitle">Create Account</h2>
-            <p id="regSubtitle">Select your account role to complete registration</p>
+            <p id="regSubtitle">Select your role to get started</p>
         </div>
 
-        <!-- Role Selector UI -->
+        <!-- Role Selector Switch -->
         <div class="role-switch-container">
             <button type="button" class="role-tab <%= !isAdminRole ? "active-user" : "" %>" id="btnRegUser" onclick="setRegRole('USER')">
-                <span style="font-size: 1.15rem;">👤</span> Customer Registration
+                <span style="font-size: 1.15rem;">👤</span> Customer
             </button>
             <button type="button" class="role-tab <%= isAdminRole ? "active-admin" : "" %>" id="btnRegAdmin" onclick="setRegRole('ADMIN')">
-                <span style="font-size: 1.15rem;">🛡️</span> Bank Admin Registration
+                <span style="font-size: 1.15rem;">🛡️</span> Bank Admin
             </button>
         </div>
 
@@ -114,107 +102,55 @@
 
         <!-- 1. Customer Registration Form -->
         <div id="customerRegSection" style="<%= isAdminRole ? "display: none;" : "display: block;" %>">
-            <form action="${pageContext.request.contextPath}/user/register" method="post">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="firstName">First Name *</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="lastName">Last Name *</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" placeholder="e.g. yourname@example.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="text" id="phone" name="phone" placeholder="10-digit mobile number" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Account Password *</label>
-                        <input type="password" id="password" name="password" placeholder="Choose a strong password" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dateOfBirth">Date of Birth</label>
-                        <input type="date" id="dateOfBirth" name="dateOfBirth">
-                    </div>
+            <form action="${pageContext.request.contextPath}/user/register" method="post" onsubmit="return validatePasswords('userPass', 'userConfirmPass')">
+                <div class="form-group">
+                    <label for="userName">Full Name *</label>
+                    <input type="text" id="userName" name="name" placeholder="Enter your full name" required <%= !isAdminRole ? "autofocus" : "" %>>
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Residential Address</label>
-                    <textarea id="address" name="address" rows="2" placeholder="Street address or apartment"></textarea>
+                    <label for="userEmail">Email Address *</label>
+                    <input type="email" id="userEmail" name="email" placeholder="e.g. name@example.com" required>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="city">City</label>
-                        <input type="text" id="city" name="city" placeholder="City">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="state">State</label>
-                        <input type="text" id="state" name="state" placeholder="State">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="pincode">Pincode</label>
-                        <input type="text" id="pincode" name="pincode" placeholder="Postal code">
-                    </div>
+                <div class="form-group">
+                    <label for="userPass">Password *</label>
+                    <input type="password" id="userPass" name="password" placeholder="Create a password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Register Customer Account</button>
+                <div class="form-group">
+                    <label for="userConfirmPass">Confirm Password *</label>
+                    <input type="password" id="userConfirmPass" name="confirmPassword" placeholder="Re-enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 8px;">Create Customer Account</button>
             </form>
         </div>
 
         <!-- 2. Admin Registration Form -->
         <div id="adminRegSection" style="<%= isAdminRole ? "display: block;" : "display: none;" %>">
-            <div class="security-badge">
-                🔒 <strong>Restricted:</strong> Bank staff registration requires the system administrator security key.
-            </div>
-
-            <form action="${pageContext.request.contextPath}/admin/register" method="post">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="adminFullName">Administrator Full Name *</label>
-                        <input type="text" id="adminFullName" name="fullName" placeholder="e.g. Sarah Jenkins" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="adminUsernameInput">Admin Username *</label>
-                        <input type="text" id="adminUsernameInput" name="username" placeholder="e.g. sjenkins" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="adminEmailInput">Admin Official Email</label>
-                        <input type="email" id="adminEmailInput" name="email" placeholder="e.g. sjenkins@ebanking.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="adminPasswordInput">Admin Password *</label>
-                        <input type="password" id="adminPasswordInput" name="password" placeholder="Set admin password" required>
-                    </div>
+            <form action="${pageContext.request.contextPath}/admin/register" method="post" onsubmit="return validatePasswords('adminPass', 'adminConfirmPass')">
+                <div class="form-group">
+                    <label for="adminName">Full Name *</label>
+                    <input type="text" id="adminName" name="name" placeholder="Enter administrator full name" required <%= isAdminRole ? "autofocus" : "" %>>
                 </div>
 
                 <div class="form-group">
-                    <label for="adminKey">Admin Security Key *</label>
-                    <input type="text" id="adminKey" name="adminKey" placeholder="Enter System Key (Use: ADMIN2026)" required>
-                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">System demo authorization key: <code>ADMIN2026</code></small>
+                    <label for="adminEmail">Email Address *</label>
+                    <input type="email" id="adminEmail" name="email" placeholder="e.g. admin@ebanking.com" required>
                 </div>
 
-                <button type="submit" class="btn btn-admin" style="margin-top: 10px;">Register Administrator Account</button>
+                <div class="form-group">
+                    <label for="adminPass">Password *</label>
+                    <input type="password" id="adminPass" name="password" placeholder="Create admin password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminConfirmPass">Confirm Password *</label>
+                    <input type="password" id="adminConfirmPass" name="confirmPassword" placeholder="Re-enter admin password" required>
+                </div>
+
+                <button type="submit" class="btn btn-admin" style="margin-top: 8px;">Create Admin Account</button>
             </form>
         </div>
 
@@ -234,12 +170,28 @@
         document.getElementById('adminRegSection').style.display = isAdm ? 'block' : 'none';
 
         document.getElementById('regSubtitle').innerText = isAdm 
-            ? 'Fill in administrator credentials and security key to create your staff account' 
-            : 'Fill in your personal details below to register your customer banking account';
+            ? 'Fill in administrator details to register your staff account' 
+            : 'Fill in your details below to register your customer account';
 
         document.getElementById('loginLink').href = isAdm 
             ? 'login.jsp?role=admin' 
             : 'login.jsp?role=user';
+
+        if (isAdm) {
+            document.getElementById('adminName').focus();
+        } else {
+            document.getElementById('userName').focus();
+        }
+    }
+
+    function validatePasswords(p1Id, p2Id) {
+        const p1 = document.getElementById(p1Id).value;
+        const p2 = document.getElementById(p2Id).value;
+        if (p1 !== p2) {
+            alert('Password and Confirm Password do not match. Please verify and try again.');
+            return false;
+        }
+        return true;
     }
 
     // Set initial role if passed

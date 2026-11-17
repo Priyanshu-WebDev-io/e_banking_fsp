@@ -14,10 +14,10 @@ CREATE TABLE IF NOT EXISTS users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
 
     first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) DEFAULT '',
 
     email VARCHAR(100) NOT NULL UNIQUE,
-    phone VARCHAR(15) NOT NULL UNIQUE,
+    phone VARCHAR(15) UNIQUE,
 
     password_hash VARCHAR(255) NOT NULL,
 
@@ -69,10 +69,10 @@ ON DUPLICATE KEY UPDATE account_number = VALUES(account_number);
 -- =============================================
 CREATE TABLE IF NOT EXISTS admins (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(50) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
