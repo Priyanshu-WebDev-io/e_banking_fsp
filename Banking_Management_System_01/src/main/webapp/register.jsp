@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - E-Banking</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
         .role-switch-container {
             display: flex;
@@ -68,19 +68,19 @@
 </head>
 <body>
 
-<div class="container-sm">
+<div class="container-sm" id="regApp" data-role="<%= isAdminRole ? "ADMIN" : "USER" %>">
     <div class="navbar-custom">
         <h2>E-Banking</h2>
         <div class="user-info">
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
-            <a href="login.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Login</a>
+            <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;" id="navLoginLink">Login</a>
         </div>
     </div>
 
     <div class="card">
         <div class="brand-header">
-            <h2 id="regHeaderTitle">Create Account</h2>
-            <p id="regSubtitle">Select your role to get started</p>
+            <h2 id="regHeaderTitle"><%= isAdminRole ? "Create Administrator Account" : "Create Customer Account" %></h2>
+            <p id="regSubtitle"><%= isAdminRole ? "Fill in administrator details to register your staff account" : "Fill in your details below to register your customer account" %></p>
         </div>
 
         <!-- Role Selector Switch -->
@@ -155,38 +155,62 @@
         </div>
 
         <div class="auth-links">
-            Already have an account? <a href="login.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="loginLink">Login here</a>
+            Already have an account? <a href="${pageContext.request.contextPath}/login.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="loginLink">Login here</a>
         </div>
     </div>
 </div>
 
 <script>
     function setRegRole(role) {
-        const isAdm = (role === 'ADMIN');
-        document.getElementById('btnRegUser').className = isAdm ? 'role-tab' : 'role-tab active-user';
-        document.getElementById('btnRegAdmin').className = isAdm ? 'role-tab active-admin' : 'role-tab';
+        var isAdm = (role === 'ADMIN');
 
-        document.getElementById('customerRegSection').style.display = isAdm ? 'none' : 'block';
-        document.getElementById('adminRegSection').style.display = isAdm ? 'block' : 'none';
+        var btnUser = document.getElementById('btnRegUser');
+        var btnAdmin = document.getElementById('btnRegAdmin');
+        if (btnUser) btnUser.className = isAdm ? 'role-tab' : 'role-tab active-user';
+        if (btnAdmin) btnAdmin.className = isAdm ? 'role-tab active-admin' : 'role-tab';
 
-        document.getElementById('regSubtitle').innerText = isAdm 
-            ? 'Fill in administrator details to register your staff account' 
-            : 'Fill in your details below to register your customer account';
+        var custSection = document.getElementById('customerRegSection');
+        var admSection = document.getElementById('adminRegSection');
+        if (custSection) custSection.style.display = isAdm ? 'none' : 'block';
+        if (admSection) admSection.style.display = isAdm ? 'block' : 'none';
 
-        document.getElementById('loginLink').href = isAdm 
-            ? 'login.jsp?role=admin' 
-            : 'login.jsp?role=user';
+        var regTitle = document.getElementById('regHeaderTitle');
+        if (regTitle) {
+            regTitle.textContent = isAdm ? 'Create Administrator Account' : 'Create Customer Account';
+        }
 
-        if (isAdm) {
-            document.getElementById('adminName').focus();
-        } else {
-            document.getElementById('userName').focus();
+        var regSub = document.getElementById('regSubtitle');
+        if (regSub) {
+            regSub.textContent = isAdm 
+                ? 'Fill in administrator details to register your staff account' 
+                : 'Fill in your details below to register your customer account';
+        }
+
+        var loginLink = document.getElementById('loginLink');
+        if (loginLink) {
+            loginLink.setAttribute('href', '${pageContext.request.contextPath}/login.jsp?role=' + (isAdm ? 'admin' : 'user'));
+        }
+
+        var navLogin = document.getElementById('navLoginLink');
+        if (navLogin) {
+            navLogin.setAttribute('href', '${pageContext.request.contextPath}/login.jsp?role=' + (isAdm ? 'admin' : 'user'));
+        }
+
+        var adminInput = document.getElementById('adminName');
+        var userInput = document.getElementById('userName');
+        if (isAdm && adminInput) {
+            adminInput.focus();
+        } else if (!isAdm && userInput) {
+            userInput.focus();
         }
     }
 
     function validatePasswords(p1Id, p2Id) {
-        const p1 = document.getElementById(p1Id).value;
-        const p2 = document.getElementById(p2Id).value;
+        var p1Elem = document.getElementById(p1Id);
+        var p2Elem = document.getElementById(p2Id);
+        if (!p1Elem || !p2Elem) return true;
+        var p1 = p1Elem.value;
+        var p2 = p2Elem.value;
         if (p1 !== p2) {
             alert('Password and Confirm Password do not match. Please verify and try again.');
             return false;
@@ -194,11 +218,14 @@
         return true;
     }
 
-    // Set initial role if passed
     window.addEventListener('DOMContentLoaded', function() {
-        <% if (isAdminRole) { %>
+        var app = document.getElementById('regApp');
+        var initialRole = (app && app.getAttribute('data-role')) ? app.getAttribute('data-role') : 'USER';
+        if (initialRole === 'ADMIN') {
             setRegRole('ADMIN');
-        <% } %>
+        } else {
+            setRegRole('USER');
+        }
     });
 </script>
 

@@ -8,6 +8,9 @@
     boolean isAdminRole = "admin".equalsIgnoreCase(selectedRole);
 
     String error = (String) request.getAttribute("error");
+    if (error == null && "true".equalsIgnoreCase(request.getParameter("error"))) {
+        error = "Invalid credentials. Please verify your details and try again.";
+    }
     String registered = request.getParameter("registered");
     String loggedOut = request.getParameter("loggedOut");
 %>
@@ -17,7 +20,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - E-Banking</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
         .role-switch-container {
             display: flex;
@@ -75,24 +78,29 @@
             font-size: 0.85rem;
             color: var(--text-muted);
             text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .demo-box:hover {
+            background-color: #f1f5f9;
         }
     </style>
 </head>
 <body>
 
-<div class="container-sm">
+<div class="container-sm" id="loginApp" data-role="<%= isAdminRole ? "ADMIN" : "USER" %>">
     <div class="navbar-custom">
         <h2>E-Banking</h2>
         <div class="user-info">
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
-            <a href="register.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Register</a>
+            <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;" id="navRegisterLink">Register</a>
         </div>
     </div>
 
     <div class="card">
         <div class="brand-header">
-            <h2 id="roleHeaderTitle">Portal Sign In</h2>
-            <p id="roleSubtitle">Select your role to access your portal</p>
+            <h2 id="roleHeaderTitle"><%= isAdminRole ? "Administrator Sign In" : "Customer Sign In" %></h2>
+            <p id="roleSubtitle"><%= isAdminRole ? "Access the Bank Administrator Operations Portal" : "Access your Personal Internet Banking Account" %></p>
         </div>
 
         <!-- Role Selector UI -->
@@ -129,7 +137,7 @@
             <form action="${pageContext.request.contextPath}/user/login" method="post">
                 <div class="form-group">
                     <label for="email">Customer Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="e.g. john.doe@example.com" required <%= !isAdminRole ? "autofocus" : "" %>>
+                    <input type="email" id="email" name="email" placeholder="e.g. rahul@gmail.com" required <%= !isAdminRole ? "autofocus" : "" %>>
                 </div>
 
                 <div class="form-group">
@@ -140,8 +148,8 @@
                 <button type="submit" class="btn btn-primary">Login as Customer</button>
             </form>
 
-            <div class="demo-box">
-                <strong>Demo Customer:</strong> <code>rahul@gmail.com</code> / <code>user123</code>
+            <div class="demo-box" onclick="fillCustomerDemo()" title="Click to autofill credentials">
+                <strong>Demo Customer (Click to autofill):</strong> <code>rahul@gmail.com</code> / <code>user123</code>
             </div>
         </div>
 
@@ -150,7 +158,7 @@
             <form action="${pageContext.request.contextPath}/admin/login" method="post">
                 <div class="form-group">
                     <label for="adminUsername">Admin Email or Username</label>
-                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@ebanking.com or admin" required <%= isAdminRole ? "autofocus" : "" %>>
+                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@gmail.com or admin" required <%= isAdminRole ? "autofocus" : "" %>>
                 </div>
 
                 <div class="form-group">
@@ -161,46 +169,84 @@
                 <button type="submit" class="btn btn-admin">Login as Administrator</button>
             </form>
 
-            <div class="demo-box">
-                <strong>Demo Admin:</strong> <code>admin@gmail.com</code> (or <code>admin</code>) / <code>admin123</code>
+            <div class="demo-box" onclick="fillAdminDemo()" title="Click to autofill credentials">
+                <strong>Demo Admin (Click to autofill):</strong> <code>admin@gmail.com</code> / <code>admin123</code>
             </div>
         </div>
 
         <div class="auth-links">
-            Don't have an account? <a href="register.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="registerLink">Register new account</a>
+            Don't have an account? <a href="${pageContext.request.contextPath}/register.jsp<%= isAdminRole ? "?role=admin" : "" %>" id="registerLink">Register new account</a>
         </div>
     </div>
 </div>
 
 <script>
     function setRole(role) {
-        const isAdm = (role === 'ADMIN');
-        document.getElementById('btnRoleUser').className = isAdm ? 'role-tab' : 'role-tab active-user';
-        document.getElementById('btnRoleAdmin').className = isAdm ? 'role-tab active-admin' : 'role-tab';
+        var isAdm = (role === 'ADMIN');
 
-        document.getElementById('customerSection').style.display = isAdm ? 'none' : 'block';
-        document.getElementById('adminSection').style.display = isAdm ? 'block' : 'none';
+        var btnUser = document.getElementById('btnRoleUser');
+        var btnAdmin = document.getElementById('btnRoleAdmin');
+        if (btnUser) btnUser.className = isAdm ? 'role-tab' : 'role-tab active-user';
+        if (btnAdmin) btnAdmin.className = isAdm ? 'role-tab active-admin' : 'role-tab';
 
-        document.getElementById('roleSubtitle').innerText = isAdm 
-            ? 'Access the Bank Administrator Operations Portal' 
-            : 'Access your Personal Internet Banking Account';
+        var custSection = document.getElementById('customerSection');
+        var admSection = document.getElementById('adminSection');
+        if (custSection) custSection.style.display = isAdm ? 'none' : 'block';
+        if (admSection) admSection.style.display = isAdm ? 'block' : 'none';
 
-        document.getElementById('registerLink').href = isAdm 
-            ? 'register.jsp?role=admin' 
-            : 'register.jsp?role=user';
+        var roleTitle = document.getElementById('roleHeaderTitle');
+        if (roleTitle) {
+            roleTitle.textContent = isAdm ? 'Administrator Sign In' : 'Customer Sign In';
+        }
 
-        if (isAdm) {
-            document.getElementById('adminUsername').focus();
-        } else {
-            document.getElementById('email').focus();
+        var roleSub = document.getElementById('roleSubtitle');
+        if (roleSub) {
+            roleSub.textContent = isAdm 
+                ? 'Access the Bank Administrator Operations Portal' 
+                : 'Access your Personal Internet Banking Account';
+        }
+
+        var regLink = document.getElementById('registerLink');
+        if (regLink) {
+            regLink.setAttribute('href', '${pageContext.request.contextPath}/register.jsp?role=' + (isAdm ? 'admin' : 'user'));
+        }
+
+        var navRegLink = document.getElementById('navRegisterLink');
+        if (navRegLink) {
+            navRegLink.setAttribute('href', '${pageContext.request.contextPath}/register.jsp?role=' + (isAdm ? 'admin' : 'user'));
+        }
+
+        var adminInput = document.getElementById('adminUsername');
+        var userInput = document.getElementById('email');
+        if (isAdm && adminInput) {
+            adminInput.focus();
+        } else if (!isAdm && userInput) {
+            userInput.focus();
         }
     }
 
-    // Set initial text
+    function fillCustomerDemo() {
+        var email = document.getElementById('email');
+        var pass = document.getElementById('password');
+        if (email) email.value = 'rahul@gmail.com';
+        if (pass) pass.value = 'user123';
+    }
+
+    function fillAdminDemo() {
+        var user = document.getElementById('adminUsername');
+        var pass = document.getElementById('adminPassword');
+        if (user) user.value = 'admin@gmail.com';
+        if (pass) pass.value = 'admin123';
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
-        <% if (isAdminRole) { %>
+        var app = document.getElementById('loginApp');
+        var initialRole = (app && app.getAttribute('data-role')) ? app.getAttribute('data-role') : 'USER';
+        if (initialRole === 'ADMIN') {
             setRole('ADMIN');
-        <% } %>
+        } else {
+            setRole('USER');
+        }
     });
 </script>
 
