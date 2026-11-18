@@ -79,6 +79,34 @@
             margin-bottom: 14px;
             margin-top: 24px;
         }
+        .admin-nav-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: #ffffff;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .admin-nav-bar .nav-link {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .admin-nav-bar .nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .admin-nav-bar .nav-link.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
         .nav-admin-badge {
             background-color: #fee2e2;
             color: #991b1b;
@@ -146,9 +174,20 @@
             <span class="nav-admin-badge">Admin</span>
             <span>Welcome, <strong><%= adminName != null ? adminName : adminUsername %></strong></span>
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
-            <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Partner Banks</a>
             <a href="${pageContext.request.contextPath}/admin/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
         </div>
+    </div>
+
+    <!-- Sub-navigation Bar -->
+    <div class="admin-nav-bar">
+        <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">📊 Command Center</a>
+        <a href="${pageContext.request.contextPath}/admin/banks" class="nav-link active">🏛️ Partner Banks</a>
+        <a href="${pageContext.request.contextPath}/admin/customers" class="nav-link">👥 Customers</a>
+        <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-link">🏦 Bank Accounts</a>
+        <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link">💳 Transactions Ledger</a>
+        <a href="${pageContext.request.contextPath}/admin/loans" class="nav-link">📜 Loans Desk</a>
+        <a href="${pageContext.request.contextPath}/admin/cards" class="nav-link">🪪 Cards Desk</a>
+        <a href="${pageContext.request.contextPath}/admin/reports" class="nav-link">📈 Reports & Audit</a>
     </div>
 
     <!-- Feedback Alerts -->

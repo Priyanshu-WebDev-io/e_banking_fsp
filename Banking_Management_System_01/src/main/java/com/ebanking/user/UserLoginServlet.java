@@ -102,7 +102,7 @@ public class UserLoginServlet extends HttpServlet {
                     userMap.put("status", status);
                     session.setAttribute("user", userMap);
 
-                    response.sendRedirect(request.getContextPath() + "/user/dashboard.jsp");
+                    response.sendRedirect(request.getContextPath() + "/user/dashboard");
                 } else {
                     request.setAttribute("error", "Invalid email or password, or account is inactive.");
                     request.setAttribute("selectedRole", "USER");

@@ -98,9 +98,11 @@
         <h2>E-Banking Customer Portal</h2>
         <div class="user-info">
             <span>Welcome, <strong><%= userFullName %></strong></span>
-            <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
-            <a href="${pageContext.request.contextPath}/account/list" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">My Accounts</a>
+            <a href="${pageContext.request.contextPath}/user/dashboard" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
+            <a href="${pageContext.request.contextPath}/account/list" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Accounts</a>
             <a href="${pageContext.request.contextPath}/user/transactions" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Transactions</a>
+            <a href="${pageContext.request.contextPath}/user/cards" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Cards</a>
+            <a href="${pageContext.request.contextPath}/user/loans" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Loans</a>
             <a href="${pageContext.request.contextPath}/user/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
         </div>
     </div>

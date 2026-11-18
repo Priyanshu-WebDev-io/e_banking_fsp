@@ -1,819 +1,447 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ page import="java.util.List, java.util.Map, java.math.BigDecimal, java.text.NumberFormat, java.util.Locale" %>
-        <% Integer adminId=(Integer) session.getAttribute("adminId"); if (adminId==null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp?role=admin" ); return; } String
-            adminName=(String) session.getAttribute("adminName"); String adminUsername=(String)
-            session.getAttribute("adminUsername"); Integer totalCustomers=(Integer)
-            request.getAttribute("totalCustomers"); if (totalCustomers==null) totalCustomers=0; Integer
-            totalAccounts=(Integer) request.getAttribute("totalAccounts"); if (totalAccounts==null) totalAccounts=0;
-            Integer totalBanks=(Integer) request.getAttribute("totalBanks"); if (totalBanks==null) totalBanks=0;
-            Integer totalTransactions=(Integer) request.getAttribute("totalTransactions"); if (totalTransactions==null) totalTransactions=0;
-            BigDecimal totalCommissions=(BigDecimal) request.getAttribute("totalCommissions"); if (totalCommissions==null) totalCommissions=BigDecimal.ZERO;
-            BigDecimal totalDeposits=(BigDecimal) request.getAttribute("totalDeposits"); if (totalDeposits==null)
-            totalDeposits=BigDecimal.ZERO; NumberFormat currencyFormat=NumberFormat.getCurrencyInstance(new
-            Locale("en", "IN" )); @SuppressWarnings("unchecked") List<Map<String, Object>> customers = (List<Map<String,
-                Object>>) request.getAttribute("customers");
+<%@ page import="java.math.BigDecimal, java.text.NumberFormat, java.util.Locale" %>
+<%
+    Integer adminId = (Integer) session.getAttribute("adminId");
+    if (adminId == null) {
+        response.sendRedirect(request.getContextPath() + "/login.jsp?role=admin");
+        return;
+    }
 
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> accounts = (List<Map<String, Object>>) request.getAttribute("accounts");
+    String adminName = (String) session.getAttribute("adminName");
+    String adminUsername = (String) session.getAttribute("adminUsername");
 
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> transactions = (List<Map<String, Object>>) request.getAttribute("transactions");
+    Integer totalCustomers = (Integer) request.getAttribute("totalCustomers");
+    if (totalCustomers == null) totalCustomers = 0;
 
-                Integer totalCards=(Integer) request.getAttribute("totalCards"); if (totalCards==null) totalCards=0;
-                Integer blockedCards=(Integer) request.getAttribute("blockedCards"); if (blockedCards==null) blockedCards=0;
+    Integer totalAccounts = (Integer) request.getAttribute("totalAccounts");
+    if (totalAccounts == null) totalAccounts = 0;
 
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> cards = (List<Map<String, Object>>) request.getAttribute("cards");
+    Integer totalBanks = (Integer) request.getAttribute("totalBanks");
+    if (totalBanks == null) totalBanks = 0;
 
-                Integer totalLoans=(Integer) request.getAttribute("totalLoans"); if (totalLoans==null) totalLoans=0;
-                Integer pendingLoans=(Integer) request.getAttribute("pendingLoans"); if (pendingLoans==null) pendingLoans=0;
-                Integer disbursedLoans=(Integer) request.getAttribute("disbursedLoans"); if (disbursedLoans==null) disbursedLoans=0;
-                BigDecimal totalDisbursedAmount=(BigDecimal) request.getAttribute("totalDisbursedAmount"); if (totalDisbursedAmount==null) totalDisbursedAmount=BigDecimal.ZERO;
+    Integer totalTransactions = (Integer) request.getAttribute("totalTransactions");
+    if (totalTransactions == null) totalTransactions = 0;
 
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> loans = (List<Map<String, Object>>) request.getAttribute("loans");
+    BigDecimal totalCommissions = (BigDecimal) request.getAttribute("totalCommissions");
+    if (totalCommissions == null) totalCommissions = BigDecimal.ZERO;
 
-                String successParam = request.getParameter("success");
-                String errorParam = request.getParameter("error");
-                        %>
-                        <!DOCTYPE html>
-                        <html lang="en">
+    BigDecimal totalDeposits = (BigDecimal) request.getAttribute("totalDeposits");
+    if (totalDeposits == null) totalDeposits = BigDecimal.ZERO;
 
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Admin Dashboard - E-Banking</title>
-                            <link rel="stylesheet" href="../css/style.css">
-                            <style>
-                                html {
-                                    scroll-behavior: smooth;
-                                }
+    Integer totalCards = (Integer) request.getAttribute("totalCards");
+    if (totalCards == null) totalCards = 0;
 
-                                .stats-grid {
-                                    display: grid;
-                                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-                                    gap: 20px;
-                                    margin-bottom: 28px;
-                                }
+    Integer blockedCards = (Integer) request.getAttribute("blockedCards");
+    if (blockedCards == null) blockedCards = 0;
 
-                                .stat-card {
-                                    background: #ffffff;
-                                    border: 1px solid var(--border);
-                                    border-radius: var(--radius);
-                                    padding: 22px;
-                                    box-shadow: var(--shadow);
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 18px;
-                                    transition: transform 0.2s, box-shadow 0.2s;
-                                }
+    Integer totalLoans = (Integer) request.getAttribute("totalLoans");
+    if (totalLoans == null) totalLoans = 0;
 
-                                .stat-card:hover {
-                                    transform: translateY(-2px);
-                                    box-shadow: var(--shadow-lg);
-                                }
+    Integer pendingLoans = (Integer) request.getAttribute("pendingLoans");
+    if (pendingLoans == null) pendingLoans = 0;
 
-                                .stat-icon {
-                                    width: 54px;
-                                    height: 54px;
-                                    border-radius: 12px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    font-size: 1.8rem;
-                                }
+    Integer disbursedLoans = (Integer) request.getAttribute("disbursedLoans");
+    if (disbursedLoans == null) disbursedLoans = 0;
 
-                                .stat-info h4 {
-                                    font-size: 0.82rem;
-                                    color: var(--text-muted);
-                                    text-transform: uppercase;
-                                    letter-spacing: 0.5px;
-                                    margin-bottom: 4px;
-                                }
+    BigDecimal totalDisbursedAmount = (BigDecimal) request.getAttribute("totalDisbursedAmount");
+    if (totalDisbursedAmount == null) totalDisbursedAmount = BigDecimal.ZERO;
 
-                                .stat-info .stat-value {
-                                    font-size: 1.7rem;
-                                    font-weight: 800;
-                                    color: var(--text-main);
-                                }
+    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
 
-                                .section-header {
-                                    display: flex;
-                                    justify-content: space-between;
-                                    align-items: center;
-                                    margin-bottom: 14px;
-                                    margin-top: 24px;
-                                }
+    String successParam = request.getParameter("success");
+    String errorParam = request.getParameter("error");
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Command Center - E-Banking Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+        }
+        .stat-info h4 {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .stat-info .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .admin-nav-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: #ffffff;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .admin-nav-bar .nav-link {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .admin-nav-bar .nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .admin-nav-bar .nav-link.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+            margin-bottom: 36px;
+        }
+        .module-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+        .module-icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+        }
+        .module-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .module-desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+        .module-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        .module-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+        }
+        .badge-live {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-ready {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+    </style>
+</head>
+<body>
 
-                                .section-header h3 {
-                                    font-size: 1.25rem;
-                                    color: var(--text-main);
-                                    font-weight: 700;
-                                }
+<div class="container-lg">
+    <!-- Navbar -->
+    <div class="navbar-custom">
+        <h2>🛡️ E-Banking Admin Portal</h2>
+        <div class="user-info">
+            <span class="badge" style="background: #fee2e2; color: #991b1b; font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px;">Admin</span>
+            <span>Welcome, <strong><%= adminName != null ? adminName : adminUsername %></strong></span>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
+            <a href="${pageContext.request.contextPath}/admin/logout" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
+        </div>
+    </div>
 
-                                .badge-status {
-                                    padding: 4px 8px;
-                                    border-radius: 4px;
-                                    font-size: 0.75rem;
-                                    font-weight: 700;
-                                }
+    <!-- Sub-navigation Bar -->
+    <div class="admin-nav-bar">
+        <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link active">📊 Command Center</a>
+        <a href="${pageContext.request.contextPath}/admin/banks" class="nav-link">🏛️ Partner Banks</a>
+        <a href="${pageContext.request.contextPath}/admin/customers" class="nav-link">👥 Customers</a>
+        <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-link">🏦 Bank Accounts</a>
+        <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link">💳 Transactions Ledger</a>
+        <a href="${pageContext.request.contextPath}/admin/loans" class="nav-link">📜 Loans Desk</a>
+        <a href="${pageContext.request.contextPath}/admin/cards" class="nav-link">🪪 Cards Desk</a>
+        <a href="${pageContext.request.contextPath}/admin/reports" class="nav-link">📈 Reports & Audit</a>
+    </div>
 
-                                .badge-active {
-                                    background-color: var(--success-bg);
-                                    color: var(--success);
-                                }
+    <!-- Feedback Alerts -->
+    <% if ("loan_approved".equals(successParam)) { %>
+        <div class="alert alert-success" style="margin-bottom: 20px;">
+            ✅ Loan application approved! Funds have been directly disbursed to customer's account and recorded in ledger.
+        </div>
+    <% } else if (errorParam != null) { %>
+        <div class="alert alert-danger" style="margin-bottom: 20px;">
+            ❌ Platform Error: <%= errorParam %>
+        </div>
+    <% } %>
 
-                                .badge-type {
-                                    background-color: var(--primary-light);
-                                    color: var(--primary);
-                                    padding: 3px 8px;
-                                    border-radius: 4px;
-                                    font-size: 0.8rem;
-                                    font-weight: 600;
-                                }
+    <!-- Welcome Header Card -->
+    <div class="card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h3 style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px;">
+                    Hello, <%= adminName != null ? adminName : "System Administrator" %>! 👋
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.92rem;">
+                    Central Platform Governance Authority. Select an administration module below to manage partner banks, audit ledgers, review loans, and regulate customer accounts.
+                </p>
+            </div>
+            <div>
+                <span class="badge" style="background: #fef2f2; color: #991b1b; font-weight: 700; padding: 6px 14px; border-radius: 9999px; border: 1px solid #fecaca; font-size: 0.85rem;">
+                    🛡️ Central Platform Authority
+                </span>
+            </div>
+        </div>
+    </div>
 
-                                .nav-admin-badge {
-                                    background-color: #fee2e2;
-                                    color: #991b1b;
-                                    font-size: 0.8rem;
-                                    font-weight: 700;
-                                    padding: 4px 10px;
-                                    border-radius: 9999px;
-                                    margin-right: 8px;
-                                }
+    <!-- High-level KPI Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #eff6ff; color: #1d4ed8;">👥</div>
+            <div class="stat-info">
+                <h4>Total Customers</h4>
+                <div class="stat-value"><%= totalCustomers %></div>
+            </div>
+        </div>
 
-                                .module-tag {
-                                    display: inline-block;
-                                    font-size: 0.75rem;
-                                    font-weight: 700;
-                                    padding: 2px 8px;
-                                    border-radius: 4px;
-                                    margin-top: 10px;
-                                }
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #f0fdf4; color: #15803d;">🏦</div>
+            <div class="stat-info">
+                <h4>Total Bank Accounts</h4>
+                <div class="stat-value"><%= totalAccounts %></div>
+            </div>
+        </div>
 
-                                .module-tag-live {
-                                    background: #dcfce7;
-                                    color: #166534;
-                                }
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #f5f3ff; color: #7c3aed;">🏛️</div>
+            <div class="stat-info">
+                <h4>Partner Banks</h4>
+                <div class="stat-value" style="color: #7c3aed;"><%= totalBanks %></div>
+            </div>
+        </div>
 
-                                .module-tag-ready {
-                                    background: #eff6ff;
-                                    color: #1e40af;
-                                }
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #fefce8; color: #a16207;">💰</div>
+            <div class="stat-info">
+                <h4>Deposits Managed</h4>
+                <div class="stat-value" style="color: var(--success); font-size: 1.35rem;"><%= currencyFormat.format(totalDeposits) %></div>
+            </div>
+        </div>
 
-                                .module-tag-pending {
-                                    background: #fef3c7;
-                                    color: #92400e;
-                                }
-                            </style>
-                        </head>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #ecfdf5; color: #059669;">📈</div>
+            <div class="stat-info">
+                <h4>Platform Commissions</h4>
+                <div class="stat-value" style="color: #059669; font-size: 1.35rem;"><%= currencyFormat.format(totalCommissions) %></div>
+            </div>
+        </div>
 
-                        <body>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #fff7ed; color: #ea580c;">📜</div>
+            <div class="stat-info">
+                <h4>Loan Capital Outlay</h4>
+                <div class="stat-value" style="color: #ea580c; font-size: 1.35rem;"><%= currencyFormat.format(totalDisbursedAmount) %></div>
+            </div>
+        </div>
+    </div>
 
-                            <div class="container-lg">
-                                <!-- Navbar -->
-                                <div class="navbar-custom">
-                                    <h2>🛡️ E-Banking Admin Portal</h2>
-                                    <div class="user-info">
-                                        <span class="nav-admin-badge">Admin</span>
-                                        <span>Welcome, <strong>
-                                                <%= adminName !=null ? adminName : adminUsername %>
-                                            </strong></span>
-                                        <a href="${pageContext.request.contextPath}/admin/dashboard"
-                                            class="btn btn-primary"
-                                            style="padding: 6px 14px; font-size: 0.85rem;">Dashboard</a>
-                                        <a href="${pageContext.request.contextPath}/admin/banks"
-                                            class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏛️
-                                            Partner Banks</a>
-                                        <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary"
-                                            style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
-                                        <a href="${pageContext.request.contextPath}/admin/logout"
-                                            class="btn btn-secondary"
-                                            style="padding: 6px 14px; font-size: 0.85rem;">Logout</a>
-                                    </div>
-                                </div>
+    <!-- Choose an Administration Section Grid -->
+    <h3 style="margin-bottom: 16px; color: var(--text-main); font-weight: 700;">Platform Administration Modules</h3>
 
-                                <!-- Feedback Alerts -->
-                                <% if ("loan_approved".equals(successParam)) { %>
-                                    <div class="alert alert-success" style="margin-bottom: 20px;">
-                                        ✅ Loan application successfully approved! Funds have been directly disbursed into customer's holding account and credited in the ledger.
-                                    </div>
-                                <% } else if ("loan_rejected".equals(successParam)) { %>
-                                    <div class="alert alert-warning" style="margin-bottom: 20px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a;">
-                                        ⚠️ Loan application has been rejected and applicant remarks logged.
-                                    </div>
-                                <% } else if (errorParam != null) { %>
-                                    <div class="alert alert-danger" style="margin-bottom: 20px;">
-                                        ❌ Platform Action Error: <%= errorParam %>
-                                    </div>
-                                <% } %>
+    <div class="modules-grid">
+        <!-- 1. Partner Banks -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">🏛️</div>
+                <div class="module-title">Partner Banks</div>
+                <div class="module-desc">
+                    Onboard registered banking institutions (SBI, HDFC, ICICI, Axis, PNB), adjust commission rate fees, and regulate operational status.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-live"><%= totalBanks %> Institutions</span>
+                <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Manage Banks &rarr;
+                </a>
+            </div>
+        </div>
 
-                                <!-- Admin Welcome Header Card -->
-                                <div class="card" style="margin-bottom: 24px;">
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                                        <div>
-                                            <h3 style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px;">
-                                                Hello, <%= adminName !=null ? adminName : "System Administrator" %>! 👋
-                                            </h3>
-                                            <p style="color: var(--text-muted); font-size: 0.92rem;">
-                                                Platform Governance Authority. Monitor partner banks, customer accounts,
-                                                transactions, cards, loans, and platform commissions.
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span class="badge"
-                                                style="background: #fef2f2; color: #991b1b; font-weight: 700; padding: 6px 14px; border-radius: 9999px; border: 1px solid #fecaca; font-size: 0.85rem;">
-                                                🛡️ Central Platform Authority
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+        <!-- 2. Customer Management -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">👥</div>
+                <div class="module-title">Customer Management</div>
+                <div class="module-desc">
+                    Review registered customer profiles, search by name or contact, verify KYC records, monitor account balances, and toggle access status.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-live"><%= totalCustomers %> Customers</span>
+                <a href="${pageContext.request.contextPath}/admin/customers" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Open Customers Desk &rarr;
+                </a>
+            </div>
+        </div>
 
-                                <!-- Stats Grid -->
-                                <div class="stats-grid">
-                                    <div class="stat-card" style="cursor: pointer;"
-                                        onclick="document.getElementById('customers').scrollIntoView({behavior: 'smooth'})">
-                                        <div class="stat-icon" style="background-color: #eff6ff; color: #1d4ed8;">👥
-                                        </div>
-                                        <div class="stat-info">
-                                            <h4>Total Customers</h4>
-                                            <div class="stat-value">
-                                                <%= totalCustomers %>
-                                            </div>
-                                        </div>
-                                    </div>
+        <!-- 3. Bank Accounts Desk -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">🏦</div>
+                <div class="module-title">Bank Accounts Desk</div>
+                <div class="module-desc">
+                    System-wide ledger of all Savings & Current accounts across partner banks. Filter by institution, inspect balances, and verify IFSC routing.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-live"><%= totalAccounts %> Accounts</span>
+                <a href="${pageContext.request.contextPath}/admin/accounts" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Open Accounts Desk &rarr;
+                </a>
+            </div>
+        </div>
 
-                                    <div class="stat-card" style="cursor: pointer;"
-                                        onclick="document.getElementById('accounts').scrollIntoView({behavior: 'smooth'})">
-                                        <div class="stat-icon" style="background-color: #f0fdf4; color: #15803d;">🏦
-                                        </div>
-                                        <div class="stat-info">
-                                            <h4>Total Bank Accounts</h4>
-                                            <div class="stat-value">
-                                                <%= totalAccounts %>
-                                            </div>
-                                        </div>
-                                    </div>
+        <!-- 4. Transactions Ledger -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">💳</div>
+                <div class="module-title">Transactions & Ledger</div>
+                <div class="module-desc">
+                    Audit cash deposits, ATM withdrawals, and inter-bank customer fund transfers with reference numbers, status tracking, and commission cuts.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-ready"><%= totalTransactions %> Executed</span>
+                <a href="${pageContext.request.contextPath}/admin/transactions" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Open Ledger &rarr;
+                </a>
+            </div>
+        </div>
 
-                                    <div class="stat-card" style="cursor: pointer;"
-                                        onclick="location.href='${pageContext.request.contextPath}/admin/banks'">
-                                        <div class="stat-icon" style="background-color: #f5f3ff; color: #7c3aed;">🏛️
-                                        </div>
-                                        <div class="stat-info">
-                                            <h4>Partner Banks</h4>
-                                            <div class="stat-value" style="color: #7c3aed;">
-                                                <%= totalBanks %>
-                                            </div>
-                                        </div>
-                                    </div>
+        <!-- 5. Loans Review Desk -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">📜</div>
+                <div class="module-title">Loans & Disbursal Desk</div>
+                <div class="module-desc">
+                    Review pending customer loan applications, evaluate interest rates & tenures, and execute atomic approval with instant balance credit.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge <%= pendingLoans > 0 ? "badge-pending" : "badge-ready" %>">
+                    <%= pendingLoans > 0 ? pendingLoans + " Pending Review" : disbursedLoans + " Disbursed" %>
+                </span>
+                <a href="${pageContext.request.contextPath}/admin/loans" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Open Loans Desk &rarr;
+                </a>
+            </div>
+        </div>
 
-                                    <div class="stat-card">
-                                        <div class="stat-icon" style="background-color: #fefce8; color: #a16207;">💰
-                                        </div>
-                                        <div class="stat-info">
-                                            <h4>Total Deposits Managed</h4>
-                                            <div class="stat-value" style="color: var(--success);">
-                                                <%= currencyFormat.format(totalDeposits) %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+        <!-- 6. Cards Management -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">🪪</div>
+                <div class="module-title">Cards Management</div>
+                <div class="module-desc">
+                    Platform-wide virtual Debit & Credit card registry. View masked card numbers, monitor daily limits, and manage fraud security lock status.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-live"><%= totalCards %> Issued (<%= blockedCards %> Blocked)</span>
+                <a href="${pageContext.request.contextPath}/admin/cards" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Manage Cards &rarr;
+                </a>
+            </div>
+        </div>
 
-                                <!-- Platform Administration Modules (Full Grid like User Panel) -->
-                                <h3 style="margin-bottom: 14px; color: var(--text-main); font-weight: 700;">Platform
-                                    Administration Modules</h3>
+        <!-- 7. Reports & Audit -->
+        <div class="module-card">
+            <div>
+                <div class="module-icon">📊</div>
+                <div class="module-title">Reports & Audit Trail</div>
+                <div class="module-desc">
+                    Institutional performance breakdown, fee commission reconciliation by partner bank, liquidity distribution, and printable financial audit statements.
+                </div>
+            </div>
+            <div class="module-footer">
+                <span class="module-badge badge-ready">System Health: Normal</span>
+                <a href="${pageContext.request.contextPath}/admin/reports" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    View Reports &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
 
-                                <div class="dashboard-grid" style="margin-bottom: 32px;">
-                                    <!-- 1. Partner Banks -->
-                                    <a href="${pageContext.request.contextPath}/admin/banks" class="dashboard-card">
-                                        <div class="card-icon">🏛️</div>
-                                        <h3>Partner Banks</h3>
-                                        <p>Onboard banks (SBI, HDFC, ICICI), configure commission %, and regulate
-                                            institutional status</p>
-                                        <span class="module-tag module-tag-live">Active • <%= totalBanks %> Partner
-                                                Banks</span>
-                                    </a>
-
-                                    <!-- 2. Customer Management -->
-                                    <a href="#customers" class="dashboard-card">
-                                        <div class="card-icon">👥</div>
-                                        <h3>Customer Management</h3>
-                                        <p>Review customer KYC profiles, email/phone contact records, and regulate
-                                            account access</p>
-                                        <span class="module-tag module-tag-live">Active • <%= totalCustomers %>
-                                                Registered Customers</span>
-                                    </a>
-
-                                    <!-- 3. Bank Accounts -->
-                                    <a href="#accounts" class="dashboard-card">
-                                        <div class="card-icon">🏦</div>
-                                        <h3>Bank Accounts</h3>
-                                        <p>System-wide view of Savings and Current accounts, monitor holding bank
-                                            balances and IFSC codes</p>
-                                        <span class="module-tag module-tag-live">Active • <%= totalAccounts %> Live
-                                                Accounts</span>
-                                    </a>
-
-                                    <!-- 4. Transactions Ledger -->
-                                    <a href="#transactions" class="dashboard-card">
-                                        <div class="card-icon">💳</div>
-                                        <h3>Transactions & Transfers</h3>
-                                        <p>Audit cash deposits, withdrawals, and inter-bank customer fund transfers with
-                                            reference IDs</p>
-                                        <span class="module-tag module-tag-ready">Financial Ledger Ready</span>
-                                    </a>
-
-                                    <!-- 5. Commission Engine -->
-                                    <a href="${pageContext.request.contextPath}/admin/banks" class="dashboard-card">
-                                        <div class="card-icon">💰</div>
-                                        <h3>Commission Engine</h3>
-                                        <p>Configure per-bank transaction fee rates (0.50% - 1.00%) and monitor platform
-                                            revenue cuts</p>
-                                        <span class="module-tag module-tag-live">Configured per Bank</span>
-                                    </a>
-
-                                    <!-- 6. Loan Applications -->
-                                    <a href="#loans" class="dashboard-card">
-                                        <div class="card-icon">📜</div>
-                                        <h3>Loans Management</h3>
-                                        <p>Review customer loan applications, evaluate interest rates/tenures, and
-                                            approve or reject disbursals</p>
-                                        <span class="module-tag <%= pendingLoans > 0 ? "module-tag-pending" : "module-tag-live" %>">
-                                            <%= pendingLoans > 0 ? pendingLoans + " Pending Review" : totalLoans + " Applications Total" %>
-                                        </span>
-                                    </a>
-
-                                    <!-- 7. Cards Management -->
-                                    <a href="#cards" class="dashboard-card">
-                                        <div class="card-icon">🪪</div>
-                                        <h3>Cards Management</h3>
-                                        <p>Monitor customer Debit & Credit cards, view masked card numbers, and execute
-                                            security block/unblock</p>
-                                        <span class="module-tag module-tag-pending">Card Issuance & Security</span>
-                                    </a>
-
-                                    <!-- 8. Platform Reports & Audit -->
-                                    <a href="#reports" class="dashboard-card">
-                                        <div class="card-icon">📊</div>
-                                        <h3>Reports & System Audit</h3>
-                                        <p>Generate financial statements, view bank performance breakdowns, and review
-                                            operational audit trail</p>
-                                        <span class="module-tag module-tag-ready">System Compliance & Audit</span>
-                                    </a>
-                                </div>
-
-                                <!-- 1. Customer Management Table -->
-                                <div class="card" id="customers" style="margin-bottom: 28px;">
-                                    <div class="section-header" style="margin-top: 0;">
-                                        <h3>👥 Registered Customers (<%= customers !=null ? customers.size() : 0 %>)
-                                        </h3>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted);">Real-time database
-                                            records</span>
-                                    </div>
-
-                                    <div class="table-responsive">
-                                        <table class="data-table">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 8%;">User ID</th>
-                                                    <th style="width: 20%;">Full Name</th>
-                                                    <th style="width: 24%;">Email Address</th>
-                                                    <th style="width: 16%;">Phone Number</th>
-                                                    <th style="width: 14%;">City, State</th>
-                                                    <th style="width: 8%;">Status</th>
-                                                    <th style="width: 10%;">Registered</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <% if (customers !=null && !customers.isEmpty()) { for (Map<String,
-                                                    Object> c : customers) {
-                                                    String name = c.get("firstName") + " " + c.get("lastName");
-                                                    String loc = (c.get("city") != null ? c.get("city") : "") +
-                                                    (c.get("state") != null ? ", " + c.get("state") : "");
-                                                    if (loc.trim().isEmpty() || loc.trim().equals(",")) loc = "-";
-                                                    String regDate = c.get("createdAt") != null ?
-                                                    c.get("createdAt").toString().substring(0, 10) : "-";
-                                                    %>
-                                                    <tr>
-                                                        <td><strong>#<%= c.get("userId") %></strong></td>
-                                                        <td><strong>
-                                                                <%= name %>
-                                                            </strong></td>
-                                                        <td>
-                                                            <%= c.get("email") %>
-                                                        </td>
-                                                        <td>
-                                                            <%= c.get("phone") !=null ? c.get("phone") : "-" %>
-                                                        </td>
-                                                        <td>
-                                                            <%= loc %>
-                                                        </td>
-                                                        <td><span class="badge-status badge-active">
-                                                                <%= c.get("status") %>
-                                                            </span></td>
-                                                        <td style="font-size: 0.85rem; color: var(--text-muted);">
-                                                            <%= regDate %>
-                                                        </td>
-                                                    </tr>
-                                                    <% } } else { %>
-                                                        <tr>
-                                                            <td colspan="7"
-                                                                style="text-align: center; padding: 24px; color: var(--text-muted);">
-                                                                No customers registered yet.
-                                                            </td>
-                                                        </tr>
-                                                        <% } %>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <!-- 2. Accounts Management Table -->
-                                <div class="card" id="accounts" style="margin-bottom: 28px;">
-                                    <div class="section-header" style="margin-top: 0;">
-                                        <h3>🏦 Bank Accounts Across Partner Institutions (<%= accounts !=null ?
-                                                accounts.size() : 0 %>)</h3>
-                                        <span style="font-size: 0.85rem; color: var(--text-muted);">All active customer
-                                            accounts</span>
-                                    </div>
-
-                                    <div class="table-responsive">
-                                        <table class="data-table">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 8%;">Acc ID</th>
-                                                    <th style="width: 20%;">Account Number & Bank</th>
-                                                    <th style="width: 18%;">Account Holder</th>
-                                                    <th style="width: 12%;">Account Type</th>
-                                                    <th style="width: 16%;">Balance</th>
-                                                    <th style="width: 16%;">IFSC / Branch</th>
-                                                    <th style="width: 10%;">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <% if (accounts !=null && !accounts.isEmpty()) { for (Map<String,
-                                                    Object> a : accounts) {
-                                                    BigDecimal bal = (BigDecimal) a.get("balance");
-                                                    if (bal == null) bal = BigDecimal.ZERO;
-                                                    %>
-                                                    <tr>
-                                                        <td><strong>#<%= a.get("accountId") %></strong></td>
-                                                        <td>
-                                                            <strong
-                                                                style="letter-spacing: 0.5px; color: var(--primary);">
-                                                                <%= a.get("accountNumber") %>
-                                                            </strong><br>
-                                                            <span class="badge-type"
-                                                                style="font-size: 0.72rem; padding: 2px 6px;">
-                                                                🏛️ <%= a.get("bankName") !=null ? a.get("bankName")
-                                                                    : "Partner Bank" %>
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <strong>
-                                                                <%= a.get("customerName") %>
-                                                            </strong><br>
-                                                            <small style="color: var(--text-muted);">
-                                                                <%= a.get("customerEmail") %>
-                                                            </small>
-                                                        </td>
-                                                        <td><span class="badge-type">
-                                                                <%= a.get("accountType") %>
-                                                            </span></td>
-                                                        <td>
-                                                            <strong style="color: var(--success); font-size: 1.05rem;">
-                                                                <%= currencyFormat.format(bal) %>
-                                                            </strong>
-                                                        </td>
-                                                        <td>
-                                                            <small><strong>
-                                                                    <%= a.get("ifscCode") %>
-                                                                </strong></small><br>
-                                                            <small style="color: var(--text-muted);">
-                                                                <%= a.get("branchName") %>
-                                                            </small>
-                                                        </td>
-                                                        <td><span class="badge-status badge-active">
-                                                                <%= a.get("status") %>
-                                                            </span></td>
-                                                    </tr>
-                                                    <% } } else { %>
-                                                        <tr>
-                                                            <td colspan="7"
-                                                                style="text-align: center; padding: 24px; color: var(--text-muted);">
-                                                                No bank accounts created yet.
-                                                            </td>
-                                                        </tr>
-                                                        <% } %>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <!-- 3. Transactions & Ledger Section -->
-    <div class="card" id="transactions" style="margin-bottom: 28px;">
-        <div class="section-header" style="margin-top: 0;">
-            <h3>💳 Platform Transactions & Fund Transfers (<%= transactions != null ? transactions.size() : 0 %>)</h3>
-            <span class="badge" style="background: #f0fdf4; color: #166534; font-weight: 700; padding: 4px 10px; border-radius: 9999px;">
-                💰 Platform Commissions: <%= currencyFormat.format(totalCommissions) %>
+    <!-- Platform System Status Card -->
+    <div class="card" style="margin-bottom: 30px; background: #f8fafc; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="display: inline-block; width: 12px; height: 12px; background: #16a34a; border-radius: 50%;"></span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">
+                    Platform Core Engine: Operational • Database Cluster Connected • Security Encryption Enabled
+                </span>
+            </div>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">
+                Server Timestamp: <%= new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm:ss").format(new java.util.Date()) %>
             </span>
         </div>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-            Live audit ledger of customer deposits, withdrawals, and inter-bank transfers along with platform commission fees.
-        </p>
-
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 15%;">Date & Time</th>
-                        <th style="width: 18%;">Reference ID</th>
-                        <th style="width: 12%;">Type</th>
-                        <th style="width: 25%;">Transaction Flow</th>
-                        <th style="width: 16%;">Amount</th>
-                        <th style="width: 14%;">Platform Cut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <%
-                    if (transactions != null && !transactions.isEmpty()) {
-                        for (Map<String, Object> t : transactions) {
-                            String ref = (String) t.get("referenceNumber");
-                            BigDecimal amt = (BigDecimal) t.get("amount");
-                            String type = (String) t.get("transactionType");
-                            Object dateObj = t.get("createdAt");
-                            String dateStr = dateObj != null ? dateObj.toString().substring(0, 19) : "-";
-                            String fromAcc = (String) t.get("fromAccountNumber");
-                            String toAcc = (String) t.get("toAccountNumber");
-                            String fromBank = (String) t.get("fromBankName");
-                            String toBank = (String) t.get("toBankName");
-                            BigDecimal commAmt = (BigDecimal) t.get("commissionAmount");
-                %>
-                    <tr>
-                        <td style="font-size: 0.85rem; color: var(--text-muted);"><%= dateStr %></td>
-                        <td><code><%= ref %></code></td>
-                        <td><span class="badge badge-type"><%= type %></span></td>
-                        <td>
-                            <% if ("TRANSFER".equalsIgnoreCase(type)) { %>
-                                <small>#<%= fromAcc %> (<%= fromBank %>) &rarr; #<%= toAcc %> (<%= toBank %>)</small>
-                            <% } else if ("DEPOSIT".equalsIgnoreCase(type)) { %>
-                                <small>Cash in to #<%= toAcc %></small>
-                            <% } else { %>
-                                <small>Withdrawal from #<%= fromAcc %></small>
-                            <% } %>
-                        </td>
-                        <td><strong style="color: var(--text-main);"><%= currencyFormat.format(amt != null ? amt : BigDecimal.ZERO) %></strong></td>
-                        <td>
-                            <% if (commAmt != null && commAmt.compareTo(BigDecimal.ZERO) > 0) { %>
-                                <span style="color: #166534; font-weight: 700;">+<%= currencyFormat.format(commAmt) %></span>
-                            <% } else { %>
-                                <span style="color: var(--text-muted);">-</span>
-                            <% } %>
-                        </td>
-                    </tr>
-                <%
-                        }
-                    } else {
-                %>
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
-                            No transactions executed yet. Customer deposits, withdrawals, and transfers will appear here in real time.
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-                </tbody>
-            </table>
-        </div>
     </div>
+</div>
 
-    <!-- 4. Loans Review & Disbursal Desk -->
-    <div class="card" id="loans" style="margin-bottom: 32px;">
-        <div class="section-header" style="margin-top: 0;">
-            <h3 style="font-size: 1.25rem;">📜 Loan Applications Review Desk (<%= totalLoans %>)</h3>
-            <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
-                Pending: <%= pendingLoans %> | Disbursed: <%= disbursedLoans %> | Total Disbursed: <%= currencyFormat.format(totalDisbursedAmount) %>
-            </span>
-        </div>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
-            Evaluate customer loan applications across partner bank schemes. Approving an application instantly credits funds to the customer's account and logs a double-entry ledger record.
-        </p>
-
-        <div class="table-responsive">
-            <table class="data-table" style="font-size: 0.85rem;">
-                <thead>
-                    <tr>
-                        <th>Application Ref</th>
-                        <th>Customer & Account</th>
-                        <th>Scheme & Type</th>
-                        <th>Principal & Tenure</th>
-                        <th>Monthly EMI</th>
-                        <th>Status</th>
-                        <th>Administrative Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <%
-                    if (loans != null && !loans.isEmpty()) {
-                        for (Map<String, Object> l : loans) {
-                            Integer lId = (Integer) l.get("loanId");
-                            String appNum = (String) l.get("applicationNumber");
-                            String cName = (String) l.get("customerName");
-                            String cEmail = (String) l.get("customerEmail");
-                            String accNum = (String) l.get("accountNumber");
-                            String bName = (String) l.get("bankName");
-                            String pName = (String) l.get("productName");
-                            BigDecimal principal = (BigDecimal) l.get("principalAmount");
-                            BigDecimal emi = (BigDecimal) l.get("monthlyEmi");
-                            BigDecimal rate = (BigDecimal) l.get("interestRate");
-                            Integer tenure = (Integer) l.get("tenureMonths");
-                            String lStatus = (String) l.get("status");
-                            String remarks = (String) l.get("remarks");
-                            java.sql.Timestamp appliedAt = (java.sql.Timestamp) l.get("createdAt");
-                            java.sql.Timestamp disbursedAt = (java.sql.Timestamp) l.get("disbursedAt");
-
-                            String badgeClass = "badge-pending";
-                            if ("DISBURSED".equalsIgnoreCase(lStatus) || "APPROVED".equalsIgnoreCase(lStatus)) {
-                                badgeClass = "badge-active";
-                            } else if ("REJECTED".equalsIgnoreCase(lStatus)) {
-                                badgeClass = "badge-inactive";
-                            }
-                %>
-                    <tr>
-                        <td>
-                            <code><%= appNum %></code><br>
-                            <small style="color: var(--text-muted);"><%= appliedAt != null ? appliedAt.toString().substring(0, 16) : "" %></small>
-                        </td>
-                        <td>
-                            <strong><%= cName %></strong><br>
-                            <small style="color: var(--text-muted);"><%= cEmail %></small><br>
-                            <small>Acc #<%= accNum %> (🏛️ <%= bName %>)</small>
-                        </td>
-                        <td>
-                            <strong><%= pName %></strong><br>
-                            <small style="color: var(--text-muted);"><%= rate %>% p.a.</small>
-                        </td>
-                        <td>
-                            <strong style="color: var(--primary);"><%= currencyFormat.format(principal) %></strong><br>
-                            <small><%= tenure %> months</small>
-                        </td>
-                        <td>
-                            <strong><%= currencyFormat.format(emi) %></strong>/mo<br>
-                            <small style="color: var(--text-muted);">Total: <%= currencyFormat.format(emi.multiply(BigDecimal.valueOf(tenure))) %></small>
-                        </td>
-                        <td>
-                            <span class="badge <%= badgeClass %>" style="font-size: 0.72rem;"><%= lStatus %></span>
-                            <% if (remarks != null && !remarks.trim().isEmpty()) { %>
-                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; max-width: 140px; word-break: break-word;">
-                                    <%= remarks %>
-                                </div>
-                            <% } %>
-                        </td>
-                        <td style="white-space: nowrap;">
-                            <% if ("PENDING".equalsIgnoreCase(lStatus)) { %>
-                                <form action="${pageContext.request.contextPath}/loan" method="post" style="display: flex; flex-direction: column; gap: 6px;">
-                                    <input type="hidden" name="action" value="review">
-                                    <input type="hidden" name="loanId" value="<%= lId %>">
-                                    <input type="text" name="remarks" placeholder="Admin remarks (optional)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px; width: 150px;">
-                                    <div style="display: flex; gap: 6px;">
-                                        <button type="submit" name="decision" value="APPROVE" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.75rem; background: var(--success); border-color: var(--success);" onclick="return confirm('Approve loan and instantly disburse <%= currencyFormat.format(principal) %> to account #<%= accNum %>?')">
-                                            ✓ Disburse
-                                        </button>
-                                        <button type="submit" name="decision" value="REJECT" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);" onclick="return confirm('Reject loan application <%= appNum %>?')">
-                                            ✗ Reject
-                                        </button>
-                                    </div>
-                                </form>
-                            <% } else if ("DISBURSED".equalsIgnoreCase(lStatus)) { %>
-                                <span style="color: var(--success); font-weight: 600; font-size: 0.8rem;">✓ Funds Disbursed</span><br>
-                                <small style="color: var(--text-muted); font-size: 0.72rem;"><%= disbursedAt != null ? disbursedAt.toString().substring(0, 16) : "" %></small>
-                            <% } else { %>
-                                <span style="color: var(--text-muted); font-size: 0.8rem;">Closed</span>
-                            <% } %>
-                        </td>
-                    </tr>
-                <%
-                        }
-                    } else {
-                %>
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                            No loan applications received yet. Customer loan applications will appear here for review.
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 5. Cards Management Desk -->
-    <div class="card" id="cards" style="margin-bottom: 32px;">
-        <div class="section-header" style="margin-top: 0;">
-            <h3 style="font-size: 1.25rem;">🪪 Cards Management Desk (<%= totalCards %>)</h3>
-            <span class="badge" style="background: #eff6ff; color: #1e40af; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
-                Active: <%= totalCards - blockedCards %> | Blocked: <%= blockedCards %>
-            </span>
-        </div>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
-            Platform-wide customer Debit & Credit cards with masked representations, spending limits, and security monitoring.
-        </p>
-
-        <div class="table-responsive">
-            <table class="data-table" style="font-size: 0.85rem;">
-                <thead>
-                    <tr>
-                        <th>Cardholder & Account</th>
-                        <th>Holding Bank</th>
-                        <th>Masked Number</th>
-                        <th>Type</th>
-                        <th>Daily Limit</th>
-                        <th>Expires</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <%
-                    if (cards != null && !cards.isEmpty()) {
-                        for (Map<String, Object> card : cards) {
-                            String maskedNum = (String) card.get("maskedNumber");
-                            String cType = (String) card.get("cardType");
-                            String cHolder = (String) card.get("cardHolderName");
-                            String cExp = (String) card.get("expiryDate");
-                            String cStatus = (String) card.get("status");
-                            String cAcc = (String) card.get("accountNumber");
-                            String cBank = (String) card.get("bankName");
-                            BigDecimal cLimit = (BigDecimal) card.get("dailyLimit");
-                            boolean isCBlocked = "BLOCKED".equalsIgnoreCase(cStatus);
-                %>
-                    <tr>
-                        <td>
-                            <strong><%= cHolder %></strong><br>
-                            <small style="color: var(--text-muted);">Acc #<%= cAcc %></small>
-                        </td>
-                        <td><small>🏛️ <%= cBank %></small></td>
-                        <td><code><%= maskedNum %></code></td>
-                        <td><span class="badge badge-type" style="font-size: 0.72rem;"><%= cType %></span></td>
-                        <td><%= cLimit != null ? currencyFormat.format(cLimit) : "N/A" %></td>
-                        <td><%= cExp %></td>
-                        <td>
-                            <span class="badge <%= isCBlocked ? "badge-inactive" : "badge-active" %>" style="font-size: 0.72rem;">
-                                <%= cStatus %>
-                            </span>
-                        </td>
-                    </tr>
-                <%
-                        }
-                    } else {
-                %>
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 16px; color: var(--text-muted);">
-                            No cards issued yet.
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 6. Reports & Platform Audit -->
-    <div class="card" id="reports" style="margin-bottom: 40px;">
-        <div class="section-header" style="margin-top: 0;">
-            <h3 style="font-size: 1.25rem;">📊 Platform Reports & Institutional Audit</h3>
-            <span class="module-tag module-tag-ready">System Health: Normal</span>
-        </div>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
-            Auditing partner bank compliance, fee commission reconciliation, and customer portfolio distribution.
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Audited Partner Banks</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: #7c3aed; margin-top: 4px;"><%= totalBanks %> Institutions</div>
-            </div>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Platform Liquidity</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: var(--success); margin-top: 4px;"><%= currencyFormat.format(totalDeposits) %></div>
-            </div>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Accumulated Commissions</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: #166534; margin-top: 4px;"><%= currencyFormat.format(totalCommissions) %></div>
-            </div>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Loan Capital Outlay</div>
-                <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-top: 4px;"><%= currencyFormat.format(totalDisbursedAmount) %></div>
-            </div>
-        </div>
-    </div>
-                            </div>
-
-                        </body>
-
-                        </html>
+</body>
+</html>
