@@ -234,7 +234,7 @@ erDiagram
 ## 📂 Project Directory Layout
 
 ```
-Banking_Management_System_01/
+e_banking_fsp/
 ├── pom.xml                                  # Maven dependencies & build configuration
 ├── run.sh                                   # Automated build & local Tomcat deployment script
 ├── ebanking_schema.sql                      # Complete MySQL database DDL schema and seed mock records
