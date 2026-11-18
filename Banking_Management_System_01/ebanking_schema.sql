@@ -132,6 +132,51 @@ CREATE TABLE IF NOT EXISTS cards (
 );
 
 -- =============================================
+-- 8. Loan Products Table (Loans Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS loan_products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100) NOT NULL,
+    loan_type ENUM('PERSONAL', 'HOME', 'VEHICLE', 'EDUCATION') NOT NULL,
+    interest_rate DECIMAL(5, 2) NOT NULL,
+    min_amount DECIMAL(15, 2) NOT NULL DEFAULT 10000.00,
+    max_amount DECIMAL(15, 2) NOT NULL DEFAULT 5000000.00,
+    min_tenure_months INT NOT NULL DEFAULT 6,
+    max_tenure_months INT NOT NULL DEFAULT 60,
+    status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- 9. Loan Applications Table (Loans Module)
+-- =============================================
+CREATE TABLE IF NOT EXISTS loan_applications (
+    loan_id INT PRIMARY KEY AUTO_INCREMENT,
+    application_number VARCHAR(30) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    account_id INT NOT NULL,
+    bank_id INT NOT NULL,
+    product_id INT NULL,
+    loan_type ENUM('PERSONAL', 'HOME', 'VEHICLE', 'EDUCATION') NOT NULL,
+    principal_amount DECIMAL(15, 2) NOT NULL,
+    interest_rate DECIMAL(5, 2) NOT NULL,
+    tenure_months INT NOT NULL,
+    monthly_emi DECIMAL(15, 2) NOT NULL,
+    total_repayable DECIMAL(15, 2) NOT NULL,
+    remaining_balance DECIMAL(15, 2) NOT NULL,
+    purpose VARCHAR(255),
+    status ENUM('PENDING', 'APPROVED', 'DISBURSED', 'REJECTED', 'CLOSED') DEFAULT 'PENDING',
+    remarks VARCHAR(255) DEFAULT '',
+    disbursed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_loan_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_loan_account FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+    CONSTRAINT fk_loan_bank FOREIGN KEY (bank_id) REFERENCES banks(bank_id) ON DELETE CASCADE,
+    CONSTRAINT fk_loan_product FOREIGN KEY (product_id) REFERENCES loan_products(product_id) ON DELETE SET NULL
+);
+
+-- =============================================
 -- Mock Customers (Password for all: user123)
 -- =============================================
 INSERT INTO users (user_id, first_name, last_name, email, phone, password_hash, address, city, state, pincode, status)
@@ -180,5 +225,21 @@ VALUES
 (1, '4532 8912 3456 7890', 'DEBIT', 1, 1, 'RAHUL SHARMA', '11/29', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 50000.00, 'ACTIVE'),
 (2, '5412 7634 9812 4321', 'CREDIT', 2, 2, 'PRIYANSHU KUMAR', '08/30', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 100000.00, 'ACTIVE')
 ON DUPLICATE KEY UPDATE card_number = VALUES(card_number);
+
+-- =============================================
+-- Mock Loan Products & Applications
+-- =============================================
+INSERT INTO loan_products (product_id, product_name, loan_type, interest_rate, min_amount, max_amount, min_tenure_months, max_tenure_months, status)
+VALUES
+(1, 'Quick Personal Loan', 'PERSONAL', 10.50, 10000.00, 500000.00, 6, 48, 'ACTIVE'),
+(2, 'Prime Home Loan', 'HOME', 8.25, 500000.00, 10000000.00, 12, 240, 'ACTIVE'),
+(3, 'Auto Drive Vehicle Loan', 'VEHICLE', 9.00, 50000.00, 2000000.00, 12, 84, 'ACTIVE'),
+(4, 'Scholar Education Loan', 'EDUCATION', 7.50, 50000.00, 3000000.00, 12, 120, 'ACTIVE')
+ON DUPLICATE KEY UPDATE product_name = VALUES(product_name);
+
+INSERT INTO loan_applications (loan_id, application_number, user_id, account_id, bank_id, product_id, loan_type, principal_amount, interest_rate, tenure_months, monthly_emi, total_repayable, remaining_balance, purpose, status)
+VALUES
+(1, 'LNAPP202611001', 1, 1, 1, 1, 'PERSONAL', 100000.00, 10.50, 12, 8815.00, 105780.00, 105780.00, 'Home renovation and appliance purchase', 'PENDING')
+ON DUPLICATE KEY UPDATE application_number = VALUES(application_number);
 
 

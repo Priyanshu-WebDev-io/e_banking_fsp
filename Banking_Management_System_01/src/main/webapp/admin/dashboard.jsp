@@ -25,6 +25,17 @@
 
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> cards = (List<Map<String, Object>>) request.getAttribute("cards");
+
+                Integer totalLoans=(Integer) request.getAttribute("totalLoans"); if (totalLoans==null) totalLoans=0;
+                Integer pendingLoans=(Integer) request.getAttribute("pendingLoans"); if (pendingLoans==null) pendingLoans=0;
+                Integer disbursedLoans=(Integer) request.getAttribute("disbursedLoans"); if (disbursedLoans==null) disbursedLoans=0;
+                BigDecimal totalDisbursedAmount=(BigDecimal) request.getAttribute("totalDisbursedAmount"); if (totalDisbursedAmount==null) totalDisbursedAmount=BigDecimal.ZERO;
+
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> loans = (List<Map<String, Object>>) request.getAttribute("loans");
+
+                String successParam = request.getParameter("success");
+                String errorParam = request.getParameter("error");
                         %>
                         <!DOCTYPE html>
                         <html lang="en">
@@ -183,6 +194,21 @@
                                     </div>
                                 </div>
 
+                                <!-- Feedback Alerts -->
+                                <% if ("loan_approved".equals(successParam)) { %>
+                                    <div class="alert alert-success" style="margin-bottom: 20px;">
+                                        ✅ Loan application successfully approved! Funds have been directly disbursed into customer's holding account and credited in the ledger.
+                                    </div>
+                                <% } else if ("loan_rejected".equals(successParam)) { %>
+                                    <div class="alert alert-warning" style="margin-bottom: 20px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a;">
+                                        ⚠️ Loan application has been rejected and applicant remarks logged.
+                                    </div>
+                                <% } else if (errorParam != null) { %>
+                                    <div class="alert alert-danger" style="margin-bottom: 20px;">
+                                        ❌ Platform Action Error: <%= errorParam %>
+                                    </div>
+                                <% } %>
+
                                 <!-- Admin Welcome Header Card -->
                                 <div class="card" style="margin-bottom: 24px;">
                                     <div
@@ -314,7 +340,9 @@
                                         <h3>Loans Management</h3>
                                         <p>Review customer loan applications, evaluate interest rates/tenures, and
                                             approve or reject disbursals</p>
-                                        <span class="module-tag module-tag-pending">Application Review Desk</span>
+                                        <span class="module-tag <%= pendingLoans > 0 ? "module-tag-pending" : "module-tag-live" %>">
+                                            <%= pendingLoans > 0 ? pendingLoans + " Pending Review" : totalLoans + " Applications Total" %>
+                                        </span>
                                     </a>
 
                                     <!-- 7. Cards Management -->
@@ -562,112 +590,228 @@
         </div>
     </div>
 
-    <!-- 4. Loans, Cards & Reports Overview Grid -->
-                                <div
-                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
-                                    <!-- Loans Panel -->
-                                    <div class="card" id="loans">
-                                        <div class="section-header" style="margin-top: 0;">
-                                            <h3 style="font-size: 1.1rem;">📜 Loan Applications</h3>
-                                            <span class="module-tag module-tag-pending">Review Desk</span>
-                                        </div>
-                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
-                                            Partner bank loan products (Personal, Home, Education) with tenure-based EMI
-                                            calculation and admin approval workflow.
-                                        </p>
-                                        <div
-                                            style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
-                                            <strong>Pending Applications:</strong> 0 | <strong>Active
-                                                Disbursed:</strong> 0
-                                        </div>
-                                    </div>
+    <!-- 4. Loans Review & Disbursal Desk -->
+    <div class="card" id="loans" style="margin-bottom: 32px;">
+        <div class="section-header" style="margin-top: 0;">
+            <h3 style="font-size: 1.25rem;">📜 Loan Applications Review Desk (<%= totalLoans %>)</h3>
+            <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
+                Pending: <%= pendingLoans %> | Disbursed: <%= disbursedLoans %> | Total Disbursed: <%= currencyFormat.format(totalDisbursedAmount) %>
+            </span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+            Evaluate customer loan applications across partner bank schemes. Approving an application instantly credits funds to the customer's account and logs a double-entry ledger record.
+        </p>
 
-                                    <!-- Cards Panel -->
-        <div class="card" id="cards">
-            <div class="section-header" style="margin-top: 0;">
-                <h3 style="font-size: 1.15rem;">🪪 Cards Management (<%= totalCards %>)</h3>
-                <span class="badge" style="background: #eff6ff; color: #1e40af; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
-                    Active: <%= totalCards - blockedCards %> | Blocked: <%= blockedCards %>
-                </span>
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
-                Platform-wide customer Debit & Credit cards with masked representations and status monitoring.
-            </p>
+        <div class="table-responsive">
+            <table class="data-table" style="font-size: 0.85rem;">
+                <thead>
+                    <tr>
+                        <th>Application Ref</th>
+                        <th>Customer & Account</th>
+                        <th>Scheme & Type</th>
+                        <th>Principal & Tenure</th>
+                        <th>Monthly EMI</th>
+                        <th>Status</th>
+                        <th>Administrative Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <%
+                    if (loans != null && !loans.isEmpty()) {
+                        for (Map<String, Object> l : loans) {
+                            Integer lId = (Integer) l.get("loanId");
+                            String appNum = (String) l.get("applicationNumber");
+                            String cName = (String) l.get("customerName");
+                            String cEmail = (String) l.get("customerEmail");
+                            String accNum = (String) l.get("accountNumber");
+                            String bName = (String) l.get("bankName");
+                            String pName = (String) l.get("productName");
+                            BigDecimal principal = (BigDecimal) l.get("principalAmount");
+                            BigDecimal emi = (BigDecimal) l.get("monthlyEmi");
+                            BigDecimal rate = (BigDecimal) l.get("interestRate");
+                            Integer tenure = (Integer) l.get("tenureMonths");
+                            String lStatus = (String) l.get("status");
+                            String remarks = (String) l.get("remarks");
+                            java.sql.Timestamp appliedAt = (java.sql.Timestamp) l.get("createdAt");
+                            java.sql.Timestamp disbursedAt = (java.sql.Timestamp) l.get("disbursedAt");
 
-            <div class="table-responsive">
-                <table class="data-table" style="font-size: 0.85rem;">
-                    <thead>
-                        <tr>
-                            <th>Cardholder & Account</th>
-                            <th>Holding Bank</th>
-                            <th>Masked Number</th>
-                            <th>Type</th>
-                            <th>Expires</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <%
-                        if (cards != null && !cards.isEmpty()) {
-                            for (Map<String, Object> card : cards) {
-                                String maskedNum = (String) card.get("maskedNumber");
-                                String cType = (String) card.get("cardType");
-                                String cHolder = (String) card.get("cardHolderName");
-                                String cExp = (String) card.get("expiryDate");
-                                String cStatus = (String) card.get("status");
-                                String cAcc = (String) card.get("accountNumber");
-                                String cBank = (String) card.get("bankName");
-                                boolean isCBlocked = "BLOCKED".equalsIgnoreCase(cStatus);
-                    %>
-                        <tr>
-                            <td>
-                                <strong><%= cHolder %></strong><br>
-                                <small style="color: var(--text-muted);">Acc #<%= cAcc %></small>
-                            </td>
-                            <td><small>🏛️ <%= cBank %></small></td>
-                            <td><code><%= maskedNum %></code></td>
-                            <td><span class="badge badge-type" style="font-size: 0.72rem;"><%= cType %></span></td>
-                            <td><%= cExp %></td>
-                            <td>
-                                <span class="badge <%= isCBlocked ? "badge-inactive" : "badge-active" %>" style="font-size: 0.72rem;">
-                                    <%= cStatus %>
-                                </span>
-                            </td>
-                        </tr>
-                    <%
+                            String badgeClass = "badge-pending";
+                            if ("DISBURSED".equalsIgnoreCase(lStatus) || "APPROVED".equalsIgnoreCase(lStatus)) {
+                                badgeClass = "badge-active";
+                            } else if ("REJECTED".equalsIgnoreCase(lStatus)) {
+                                badgeClass = "badge-inactive";
                             }
-                        } else {
-                    %>
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 16px; color: var(--text-muted);">
-                                No cards issued yet.
-                            </td>
-                        </tr>
-                    <%
+                %>
+                    <tr>
+                        <td>
+                            <code><%= appNum %></code><br>
+                            <small style="color: var(--text-muted);"><%= appliedAt != null ? appliedAt.toString().substring(0, 16) : "" %></small>
+                        </td>
+                        <td>
+                            <strong><%= cName %></strong><br>
+                            <small style="color: var(--text-muted);"><%= cEmail %></small><br>
+                            <small>Acc #<%= accNum %> (🏛️ <%= bName %>)</small>
+                        </td>
+                        <td>
+                            <strong><%= pName %></strong><br>
+                            <small style="color: var(--text-muted);"><%= rate %>% p.a.</small>
+                        </td>
+                        <td>
+                            <strong style="color: var(--primary);"><%= currencyFormat.format(principal) %></strong><br>
+                            <small><%= tenure %> months</small>
+                        </td>
+                        <td>
+                            <strong><%= currencyFormat.format(emi) %></strong>/mo<br>
+                            <small style="color: var(--text-muted);">Total: <%= currencyFormat.format(emi.multiply(BigDecimal.valueOf(tenure))) %></small>
+                        </td>
+                        <td>
+                            <span class="badge <%= badgeClass %>" style="font-size: 0.72rem;"><%= lStatus %></span>
+                            <% if (remarks != null && !remarks.trim().isEmpty()) { %>
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; max-width: 140px; word-break: break-word;">
+                                    <%= remarks %>
+                                </div>
+                            <% } %>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <% if ("PENDING".equalsIgnoreCase(lStatus)) { %>
+                                <form action="${pageContext.request.contextPath}/loan" method="post" style="display: flex; flex-direction: column; gap: 6px;">
+                                    <input type="hidden" name="action" value="review">
+                                    <input type="hidden" name="loanId" value="<%= lId %>">
+                                    <input type="text" name="remarks" placeholder="Admin remarks (optional)" style="padding: 4px 8px; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px; width: 150px;">
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="submit" name="decision" value="APPROVE" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.75rem; background: var(--success); border-color: var(--success);" onclick="return confirm('Approve loan and instantly disburse <%= currencyFormat.format(principal) %> to account #<%= accNum %>?')">
+                                            ✓ Disburse
+                                        </button>
+                                        <button type="submit" name="decision" value="REJECT" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);" onclick="return confirm('Reject loan application <%= appNum %>?')">
+                                            ✗ Reject
+                                        </button>
+                                    </div>
+                                </form>
+                            <% } else if ("DISBURSED".equalsIgnoreCase(lStatus)) { %>
+                                <span style="color: var(--success); font-weight: 600; font-size: 0.8rem;">✓ Funds Disbursed</span><br>
+                                <small style="color: var(--text-muted); font-size: 0.72rem;"><%= disbursedAt != null ? disbursedAt.toString().substring(0, 16) : "" %></small>
+                            <% } else { %>
+                                <span style="color: var(--text-muted); font-size: 0.8rem;">Closed</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <%
                         }
-                    %>
-                    </tbody>
-                </table>
+                    } else {
+                %>
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            No loan applications received yet. Customer loan applications will appear here for review.
+                        </td>
+                    </tr>
+                <%
+                    }
+                %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. Cards Management Desk -->
+    <div class="card" id="cards" style="margin-bottom: 32px;">
+        <div class="section-header" style="margin-top: 0;">
+            <h3 style="font-size: 1.25rem;">🪪 Cards Management Desk (<%= totalCards %>)</h3>
+            <span class="badge" style="background: #eff6ff; color: #1e40af; font-size: 0.8rem; padding: 4px 10px; border-radius: 9999px;">
+                Active: <%= totalCards - blockedCards %> | Blocked: <%= blockedCards %>
+            </span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+            Platform-wide customer Debit & Credit cards with masked representations, spending limits, and security monitoring.
+        </p>
+
+        <div class="table-responsive">
+            <table class="data-table" style="font-size: 0.85rem;">
+                <thead>
+                    <tr>
+                        <th>Cardholder & Account</th>
+                        <th>Holding Bank</th>
+                        <th>Masked Number</th>
+                        <th>Type</th>
+                        <th>Daily Limit</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <%
+                    if (cards != null && !cards.isEmpty()) {
+                        for (Map<String, Object> card : cards) {
+                            String maskedNum = (String) card.get("maskedNumber");
+                            String cType = (String) card.get("cardType");
+                            String cHolder = (String) card.get("cardHolderName");
+                            String cExp = (String) card.get("expiryDate");
+                            String cStatus = (String) card.get("status");
+                            String cAcc = (String) card.get("accountNumber");
+                            String cBank = (String) card.get("bankName");
+                            BigDecimal cLimit = (BigDecimal) card.get("dailyLimit");
+                            boolean isCBlocked = "BLOCKED".equalsIgnoreCase(cStatus);
+                %>
+                    <tr>
+                        <td>
+                            <strong><%= cHolder %></strong><br>
+                            <small style="color: var(--text-muted);">Acc #<%= cAcc %></small>
+                        </td>
+                        <td><small>🏛️ <%= cBank %></small></td>
+                        <td><code><%= maskedNum %></code></td>
+                        <td><span class="badge badge-type" style="font-size: 0.72rem;"><%= cType %></span></td>
+                        <td><%= cLimit != null ? currencyFormat.format(cLimit) : "N/A" %></td>
+                        <td><%= cExp %></td>
+                        <td>
+                            <span class="badge <%= isCBlocked ? "badge-inactive" : "badge-active" %>" style="font-size: 0.72rem;">
+                                <%= cStatus %>
+                            </span>
+                        </td>
+                    </tr>
+                <%
+                        }
+                    } else {
+                %>
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 16px; color: var(--text-muted);">
+                            No cards issued yet.
+                        </td>
+                    </tr>
+                <%
+                    }
+                %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 6. Reports & Platform Audit -->
+    <div class="card" id="reports" style="margin-bottom: 40px;">
+        <div class="section-header" style="margin-top: 0;">
+            <h3 style="font-size: 1.25rem;">📊 Platform Reports & Institutional Audit</h3>
+            <span class="module-tag module-tag-ready">System Health: Normal</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+            Auditing partner bank compliance, fee commission reconciliation, and customer portfolio distribution.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Audited Partner Banks</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #7c3aed; margin-top: 4px;"><%= totalBanks %> Institutions</div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Platform Liquidity</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--success); margin-top: 4px;"><%= currencyFormat.format(totalDeposits) %></div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Accumulated Commissions</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #166534; margin-top: 4px;"><%= currencyFormat.format(totalCommissions) %></div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Loan Capital Outlay</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-top: 4px;"><%= currencyFormat.format(totalDisbursedAmount) %></div>
             </div>
         </div>
-
-        <!-- Reports Panel -->
-                                    <div class="card" id="reports">
-                                        <div class="section-header" style="margin-top: 0;">
-                                            <h3 style="font-size: 1.1rem;">📊 Reports & Audit</h3>
-                                            <span class="module-tag module-tag-ready">System Audit</span>
-                                        </div>
-                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
-                                            Platform compliance audit logs, institutional commission reports, and
-                                            system-wide deposit tracking.
-                                        </p>
-                                        <div
-                                            style="background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border);">
-                                            <strong>Audited Institutions:</strong>
-                                            <%= totalBanks %> | <strong>System Status:</strong> HEALTHY
-                                        </div>
-                                    </div>
-                                </div>
+    </div>
                             </div>
 
                         </body>

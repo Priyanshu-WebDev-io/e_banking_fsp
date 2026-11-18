@@ -69,6 +69,12 @@
                         <p>Manage virtual Debit & Credit cards, view masked numbers, and toggle security lock</p>
                     </a>
 
+                    <a href="${pageContext.request.contextPath}/user/loans" class="dashboard-card">
+                        <div class="card-icon">💰</div>
+                        <h3>Loans & EMI</h3>
+                        <p>Explore interest rates, compute monthly EMI, and apply for instant personal or home loans</p>
+                    </a>
+
                     <a href="${pageContext.request.contextPath}/user/logout" class="dashboard-card"
                         style="border-color: #ffcdd2;">
                         <div class="card-icon">🚪</div>

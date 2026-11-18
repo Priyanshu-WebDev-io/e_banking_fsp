@@ -39,13 +39,18 @@ public class AdminDashboardServlet extends HttpServlet {
         int totalTransactions = 0;
         int totalCards = 0;
         int blockedCards = 0;
+        int totalLoans = 0;
+        int pendingLoans = 0;
+        int disbursedLoans = 0;
         BigDecimal totalDeposits = BigDecimal.ZERO;
         BigDecimal totalCommissions = BigDecimal.ZERO;
+        BigDecimal totalDisbursedAmount = BigDecimal.ZERO;
 
         List<Map<String, Object>> customers = new ArrayList<>();
         List<Map<String, Object>> accounts = new ArrayList<>();
         List<Map<String, Object>> transactions = new ArrayList<>();
         List<Map<String, Object>> cards = new ArrayList<>();
+        List<Map<String, Object>> loans = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
 
@@ -101,6 +106,24 @@ public class AdminDashboardServlet extends HttpServlet {
                 if (rs.next()) {
                     totalCards = rs.getInt(1);
                     blockedCards = rs.getInt(2);
+                }
+            }
+
+            // 2e. Metric: Loan Applications & Disbursed Totals
+            String loanMetricSql = """
+                    SELECT COUNT(*),
+                           COALESCE(SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN status = 'DISBURSED' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN status = 'DISBURSED' THEN principal_amount ELSE 0 END), 0)
+                    FROM loan_applications
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(loanMetricSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalLoans = rs.getInt(1);
+                    pendingLoans = rs.getInt(2);
+                    disbursedLoans = rs.getInt(3);
+                    totalDisbursedAmount = rs.getBigDecimal(4);
                 }
             }
 
@@ -242,6 +265,48 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
 
+            // 7. Loan Applications Overview List
+            String loansListSql = """
+                    SELECT la.loan_id, la.application_number, la.principal_amount, la.tenure_months,
+                           la.interest_rate, la.monthly_emi, la.total_repayable, la.purpose, la.status,
+                           la.remarks, la.created_at, la.disbursed_at,
+                           a.account_number,
+                           u.first_name, u.last_name, u.email,
+                           COALESCE(b.bank_name, 'Partner Bank') AS bank_name,
+                           COALESCE(lp.product_name, CONCAT(la.loan_type, ' Loan')) AS product_name
+                    FROM loan_applications la
+                    JOIN accounts a ON la.account_id = a.account_id
+                    JOIN users u ON la.user_id = u.user_id
+                    LEFT JOIN banks b ON la.bank_id = b.bank_id
+                    LEFT JOIN loan_products lp ON la.product_id = lp.product_id
+                    ORDER BY la.created_at DESC
+                    LIMIT 50
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(loansListSql);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> loan = new HashMap<>();
+                    loan.put("loanId", rs.getInt("loan_id"));
+                    loan.put("applicationNumber", rs.getString("application_number"));
+                    loan.put("principalAmount", rs.getBigDecimal("principal_amount"));
+                    loan.put("tenureMonths", rs.getInt("tenure_months"));
+                    loan.put("interestRate", rs.getBigDecimal("interest_rate"));
+                    loan.put("monthlyEmi", rs.getBigDecimal("monthly_emi"));
+                    loan.put("totalRepayable", rs.getBigDecimal("total_repayable"));
+                    loan.put("purpose", rs.getString("purpose"));
+                    loan.put("status", rs.getString("status"));
+                    loan.put("remarks", rs.getString("remarks"));
+                    loan.put("createdAt", rs.getTimestamp("created_at"));
+                    loan.put("disbursedAt", rs.getTimestamp("disbursed_at"));
+                    loan.put("accountNumber", rs.getString("account_number"));
+                    loan.put("customerName", rs.getString("first_name") + " " + rs.getString("last_name"));
+                    loan.put("customerEmail", rs.getString("email"));
+                    loan.put("bankName", rs.getString("bank_name"));
+                    loan.put("productName", rs.getString("product_name"));
+                    loans.add(loan);
+                }
+            }
+
         } catch (SQLException e) {
             log("Error fetching admin dashboard data", e);
             request.setAttribute("dbError", "Unable to load dashboard data from database.");
@@ -253,12 +318,17 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("totalTransactions", totalTransactions);
         request.setAttribute("totalCards", totalCards);
         request.setAttribute("blockedCards", blockedCards);
+        request.setAttribute("totalLoans", totalLoans);
+        request.setAttribute("pendingLoans", pendingLoans);
+        request.setAttribute("disbursedLoans", disbursedLoans);
+        request.setAttribute("totalDisbursedAmount", totalDisbursedAmount != null ? totalDisbursedAmount : BigDecimal.ZERO);
         request.setAttribute("totalCommissions", totalCommissions != null ? totalCommissions : BigDecimal.ZERO);
         request.setAttribute("totalDeposits", totalDeposits != null ? totalDeposits : BigDecimal.ZERO);
         request.setAttribute("customers", customers);
         request.setAttribute("accounts", accounts);
         request.setAttribute("transactions", transactions);
         request.setAttribute("cards", cards);
+        request.setAttribute("loans", loans);
 
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
