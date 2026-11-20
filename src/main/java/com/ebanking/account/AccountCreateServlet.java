@@ -132,7 +132,7 @@ public class AccountCreateServlet extends HttpServlet {
         String sql = """
                 INSERT INTO accounts
                 (account_number, user_id, bank_id, account_type, balance, branch_name, ifsc_code, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
                 """;
 
         try (Connection con = DBConnection.getConnection();
@@ -149,7 +149,7 @@ public class AccountCreateServlet extends HttpServlet {
             int rows = ps.executeUpdate();
 
             if (rows > 0) {
-                response.sendRedirect(request.getContextPath() + "/account/list?created=" + accountNumber);
+                response.sendRedirect(request.getContextPath() + "/account/list?pending=" + accountNumber);
             } else {
                 request.setAttribute("error", "Failed to open account. Please try again.");
                 doGet(request, response);

@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     balance DECIMAL(15, 2) NOT NULL DEFAULT 500.00,
     branch_name VARCHAR(100) DEFAULT 'Main Branch - Mumbai',
     ifsc_code VARCHAR(20) DEFAULT 'EBANK000101',
-    status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED', 'CLOSED') DEFAULT 'ACTIVE',
+    status ENUM('PENDING', 'ACTIVE', 'INACTIVE', 'BLOCKED', 'CLOSED', 'REJECTED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 );
 
 -- =============================================
--- 4. Admins Table (Admin Module)
+-- 4. Admins Table (Platform Admin Module - Commissions & Platform Governance)
 -- =============================================
 CREATE TABLE IF NOT EXISTS admins (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -79,6 +79,20 @@ CREATE TABLE IF NOT EXISTS admins (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- 4b. Bank Admins Table (Bank Admin Module - Accounts, Loans & Cards)
+-- =============================================
+CREATE TABLE IF NOT EXISTS bank_admins (
+    bank_admin_id INT PRIMARY KEY AUTO_INCREMENT,
+    bank_id INT NULL,
+    username VARCHAR(50) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bank_admin_bank FOREIGN KEY (bank_id) REFERENCES banks(bank_id) ON DELETE SET NULL
 );
 
 -- =============================================
@@ -125,7 +139,7 @@ CREATE TABLE IF NOT EXISTS cards (
     expiry_date VARCHAR(7) NOT NULL,
     cvv_hash VARCHAR(64) NOT NULL,
     daily_limit DECIMAL(15, 2) DEFAULT 50000.00,
-    status ENUM('PENDING', 'ACTIVE', 'BLOCKED', 'CANCELLED') DEFAULT 'ACTIVE',
+    status ENUM('PENDING', 'ACTIVE', 'BLOCKED', 'CANCELLED', 'REJECTED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_cards_account FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
     CONSTRAINT fk_cards_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -209,12 +223,23 @@ VALUES
 ON DUPLICATE KEY UPDATE balance = VALUES(balance);
 
 -- =============================================
--- Mock Admins (Password for all: admin123)
+-- Mock Platform Admins (Password for all: admin123)
 -- =============================================
 INSERT INTO admins (admin_id, username, email, full_name, password_hash)
 VALUES
-(1, 'admin', 'admin@gmail.com', 'System Administrator', 'admin123'),
-(2, 'priyanshu_admin', 'priyanshu.admin@gmail.com', 'Priyanshu (Admin)', 'admin123')
+(1, 'admin', 'admin@gmail.com', 'Platform Commission Administrator', 'admin123'),
+(2, 'priyanshu_admin', 'priyanshu.admin@gmail.com', 'Priyanshu (Platform Admin)', 'admin123')
+ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
+
+-- =============================================
+-- Mock Bank Admins (Password for all: admin123)
+-- =============================================
+INSERT INTO bank_admins (bank_admin_id, bank_id, username, email, full_name, password_hash)
+VALUES
+(1, NULL, 'bankadmin', 'bankadmin@gmail.com', 'Lead Bank Operations Administrator', 'admin123'),
+(2, 1, 'sbi_admin', 'sbi.admin@gmail.com', 'SBI Bank Administrator', 'admin123'),
+(3, 2, 'hdfc_admin', 'hdfc.admin@gmail.com', 'HDFC Bank Administrator', 'admin123'),
+(4, 3, 'icici_admin', 'icici.admin@gmail.com', 'ICICI Bank Administrator', 'admin123')
 ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
 
 -- =============================================

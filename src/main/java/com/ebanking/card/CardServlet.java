@@ -194,7 +194,7 @@ public class CardServlet extends HttpServlet {
                 String insertSql = """
                         INSERT INTO cards
                         (card_number, card_type, account_id, user_id, card_holder_name, expiry_date, cvv_hash, daily_limit, status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
                         """;
                 try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                     ps.setString(1, cardNumber);
@@ -208,7 +208,7 @@ public class CardServlet extends HttpServlet {
                     ps.executeUpdate();
                 }
 
-                response.sendRedirect(request.getContextPath() + "/user/cards?success=applied");
+                response.sendRedirect(request.getContextPath() + "/user/cards?success=applied_pending");
                 return;
 
             } else if ("toggle_status".equalsIgnoreCase(action)) {

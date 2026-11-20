@@ -5,7 +5,17 @@
     if (selectedRole == null) {
         selectedRole = roleParam;
     }
-    boolean isAdminRole = "admin".equalsIgnoreCase(selectedRole);
+    if (selectedRole == null || selectedRole.trim().isEmpty()) {
+        selectedRole = "USER";
+    }
+    selectedRole = selectedRole.toUpperCase();
+    if ("ADMIN".equals(selectedRole)) {
+        selectedRole = "PLATFORM_ADMIN";
+    }
+
+    boolean isCustomer = "USER".equals(selectedRole) || "CUSTOMER".equals(selectedRole);
+    boolean isBankAdmin = "BANK_ADMIN".equals(selectedRole) || "BANKADMIN".equals(selectedRole);
+    boolean isPlatformAdmin = "PLATFORM_ADMIN".equals(selectedRole) || "PLATFORM".equals(selectedRole);
 
     String error = (String) request.getAttribute("error");
     if (error == null && "true".equalsIgnoreCase(request.getParameter("error"))) {
@@ -14,14 +24,10 @@
     String registered = request.getParameter("registered");
     String loggedOut = request.getParameter("loggedOut");
 
-    String userTabClass = !isAdminRole ? "role-tab active-user" : "role-tab";
-    String adminTabClass = isAdminRole ? "role-tab active-admin" : "role-tab";
-    String customerHiddenClass = isAdminRole ? "hidden" : "";
-    String adminHiddenClass = !isAdminRole ? "hidden" : "";
-    String headerTitle = isAdminRole ? "Administrator Sign In" : "Customer Sign In";
-    String headerSubtitle = isAdminRole ? "Access the Bank Administrator Operations Portal" : "Access your Personal Internet Banking Account";
-    String registerUrl = request.getContextPath() + (isAdminRole ? "/register.jsp?role=admin" : "/register.jsp?role=user");
-    String initialRoleStr = isAdminRole ? "ADMIN" : "USER";
+    String headerTitle = isCustomer ? "Customer Sign In" : (isBankAdmin ? "Bank Administrator Sign In" : "Platform Administrator Sign In");
+    String headerSubtitle = isCustomer 
+        ? "Access your Personal Internet Banking Account" 
+        : (isBankAdmin ? "Bank Operations: Underwrite Loans, Regulate Accounts & Manage Cards" : "Platform Governance: Regulate Commissions & Partner Bank Rates");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,9 +54,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 11px 16px;
-            font-size: 0.95rem;
+            gap: 6px;
+            padding: 10px 12px;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-muted);
             background: transparent;
@@ -64,30 +70,56 @@
         }
         .role-tab.active-user {
             background: #ffffff;
-            color: var(--primary);
+            color: #2563eb;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
-        .role-tab.active-admin {
+        .role-tab.active-bank {
+            background: #ffffff;
+            color: #059669;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .role-tab.active-platform {
             background: #ffffff;
             color: #991b1b;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
-        .btn-admin {
+        .btn-bank-admin {
+            background-color: #059669;
+            color: #ffffff;
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-bank-admin:hover {
+            background-color: #047857;
+            color: #ffffff;
+        }
+        .btn-platform-admin {
             background-color: #991b1b;
             color: #ffffff;
             width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
         }
-        .btn-admin:hover {
+        .btn-platform-admin:hover {
             background-color: #7f1d1d;
             color: #ffffff;
         }
         .demo-box {
-            margin-top: 20px;
-            padding: 12px 14px;
+            margin-top: 16px;
+            padding: 10px 14px;
             background-color: #f8fafc;
             border: 1px dashed var(--border);
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             color: var(--text-muted);
             text-align: center;
             cursor: pointer;
@@ -96,13 +128,31 @@
         .demo-box:hover {
             background-color: #f1f5f9;
         }
+        .portal-direct-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+        .portal-direct-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .portal-direct-links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-<div class="container-sm" id="loginApp" data-role="<%= initialRoleStr %>">
+<div class="container-sm" id="loginApp" data-role="<%= selectedRole %>">
     <div class="navbar-custom">
-        <h2>E-Banking</h2>
+        <h2>E-Banking System</h2>
         <div class="user-info">
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">🏠 Home</a>
             <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;" id="navRegisterLink">Register</a>
@@ -112,40 +162,43 @@
     <div class="card">
         <div class="brand-header">
             <h2 id="roleHeaderTitle"><%= headerTitle %></h2>
-            <p id="roleSubtitle"><%= headerSubtitle %></p>
+            <p id="roleSubtitle" style="font-size: 0.9rem; color: #64748b;"><%= headerSubtitle %></p>
         </div>
 
-        <!-- Role Selector UI -->
+        <!-- 3-Role Selector Switcher -->
         <div class="role-switch-container">
-            <button type="button" class="<%= userTabClass %>" id="btnRoleUser" onclick="setRole('USER')">
-                <span style="font-size: 1.15rem;">👤</span> Customer Login
+            <button type="button" class="role-tab <%= isCustomer ? "active-user" : "" %>" id="btnRoleUser" onclick="setPortalRole('USER')">
+                <span style="font-size: 1.1rem;">👤</span> Customer
             </button>
-            <button type="button" class="<%= adminTabClass %>" id="btnRoleAdmin" onclick="setRole('ADMIN')">
-                <span style="font-size: 1.15rem;">🛡️</span> Bank Admin
+            <button type="button" class="role-tab <%= isBankAdmin ? "active-bank" : "" %>" id="btnRoleBank" onclick="setPortalRole('BANK_ADMIN')">
+                <span style="font-size: 1.1rem;">🏦</span> Bank Admin
+            </button>
+            <button type="button" class="role-tab <%= isPlatformAdmin ? "active-platform" : "" %>" id="btnRolePlatform" onclick="setPortalRole('PLATFORM_ADMIN')">
+                <span style="font-size: 1.1rem;">🛡️</span> Platform Admin
             </button>
         </div>
 
         <!-- Feedback Alerts -->
         <% if (error != null) { %>
-            <div class="alert alert-danger">
+            <div class="alert alert-danger" style="margin-bottom: 16px;">
                 <%= error %>
             </div>
         <% } %>
 
         <% if ("true".equals(registered)) { %>
-            <div class="alert alert-success">
+            <div class="alert alert-success" style="margin-bottom: 16px;">
                 Registration completed successfully! Please login with your credentials below.
             </div>
         <% } %>
 
         <% if ("true".equals(loggedOut)) { %>
-            <div class="alert alert-success">
+            <div class="alert alert-success" style="margin-bottom: 16px;">
                 You have been safely signed out.
             </div>
         <% } %>
 
-        <!-- Customer Login Form -->
-        <div id="customerSection" class="<%= customerHiddenClass %>">
+        <!-- 1. Customer Login Form -->
+        <div id="customerSection" class="<%= !isCustomer ? "hidden" : "" %>">
             <form action="${pageContext.request.contextPath}/user/login" method="post">
                 <div class="form-group">
                     <label for="email">Customer Email Address</label>
@@ -157,114 +210,147 @@
                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Login as Customer</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">Login as Customer</button>
             </form>
 
             <div class="demo-box" onclick="fillCustomerDemo()" title="Click to autofill credentials">
-                <strong>Demo Customer (Click to autofill):</strong> <code>rahul@gmail.com</code> / <code>user123</code>
+                <strong>Demo Customer:</strong> <code>rahul@gmail.com</code> / <code>user123</code>
+            </div>
+
+            <div class="auth-links" style="margin-top: 16px; text-align: center; font-size: 0.88rem;">
+                New customer? <a href="${pageContext.request.contextPath}/register.jsp?role=user">Open Bank Account</a>
             </div>
         </div>
 
-        <!-- Bank Admin Login Form -->
-        <div id="adminSection" class="<%= adminHiddenClass %>">
-            <form action="${pageContext.request.contextPath}/admin/login" method="post">
+        <!-- 2. Bank Admin Login Form (Accounts, Loans, Cards) -->
+        <div id="bankAdminSection" class="<%= !isBankAdmin ? "hidden" : "" %>">
+            <form action="${pageContext.request.contextPath}/bank-admin/login" method="post">
                 <div class="form-group">
-                    <label for="adminUsername">Admin Email or Username</label>
-                    <input type="text" id="adminUsername" name="username" placeholder="e.g. admin@gmail.com or admin" required>
+                    <label for="bankAdminUsername">Bank Admin Username or Email</label>
+                    <input type="text" id="bankAdminUsername" name="username" placeholder="e.g. bankadmin@gmail.com or sbi_admin" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="adminPassword">Admin Password</label>
-                    <input type="password" id="adminPassword" name="password" placeholder="Enter admin password" required>
+                    <label for="bankAdminPassword">Administrator Password</label>
+                    <input type="password" id="bankAdminPassword" name="password" placeholder="Enter bank admin password" required>
                 </div>
 
-                <button type="submit" class="btn btn-admin">Login as Administrator</button>
+                <button type="submit" class="btn-bank-admin">Sign In as Bank Administrator</button>
             </form>
 
-            <div class="demo-box" onclick="fillAdminDemo()" title="Click to autofill credentials">
-                <strong>Demo Admin (Click to autofill):</strong> <code>admin@gmail.com</code> / <code>admin123</code>
+            <div class="demo-box" onclick="fillBankAdminDemo()" title="Click to autofill Lead Bank Admin">
+                <strong>Demo Lead Bank Admin:</strong> <code>bankadmin@gmail.com</code> / <code>admin123</code>
+            </div>
+            <div class="demo-box" onclick="fillSbiAdminDemo()" style="margin-top: 6px;" title="Click to autofill SBI Bank Admin">
+                <strong>Demo SBI Bank Admin:</strong> <code>sbi.admin@gmail.com</code> / <code>admin123</code>
             </div>
         </div>
 
-        <div class="auth-links">
-            Don't have an account? <a href="<%= registerUrl %>" id="registerLink">Register new account</a>
+        <!-- 3. Platform Admin Login Form (Commissions Only) -->
+        <div id="platformAdminSection" class="<%= !isPlatformAdmin ? "hidden" : "" %>">
+            <form action="${pageContext.request.contextPath}/admin/login" method="post">
+                <div class="form-group">
+                    <label for="platformUsername">Platform Admin Email or Username</label>
+                    <input type="text" id="platformUsername" name="username" placeholder="e.g. admin@gmail.com or admin" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="platformPassword">Platform Admin Password</label>
+                    <input type="password" id="platformPassword" name="password" placeholder="Enter platform admin password" required>
+                </div>
+
+                <button type="submit" class="btn-platform-admin">Sign In as Platform Administrator</button>
+            </form>
+
+            <div class="demo-box" onclick="fillPlatformAdminDemo()" title="Click to autofill Platform Admin">
+                <strong>Demo Platform Admin:</strong> <code>admin@gmail.com</code> / <code>admin123</code>
+            </div>
+        </div>
+
+        <div class="portal-direct-links">
+            <a href="${pageContext.request.contextPath}/bank-admin/login.jsp">🏦 Dedicated Bank Admin Portal</a>
+            <span>&bull;</span>
+            <a href="${pageContext.request.contextPath}/admin/login">🛡️ Platform Commission Console</a>
         </div>
     </div>
 </div>
 
 <script>
-    function setRole(role) {
-        var isAdm = (role === 'ADMIN');
+    function setPortalRole(role) {
+        var isCust = (role === 'USER');
+        var isBank = (role === 'BANK_ADMIN');
+        var isPlat = (role === 'PLATFORM_ADMIN');
 
         var btnUser = document.getElementById('btnRoleUser');
-        var btnAdmin = document.getElementById('btnRoleAdmin');
-        if (btnUser) btnUser.className = isAdm ? 'role-tab' : 'role-tab active-user';
-        if (btnAdmin) btnAdmin.className = isAdm ? 'role-tab active-admin' : 'role-tab';
+        var btnBank = document.getElementById('btnRoleBank');
+        var btnPlat = document.getElementById('btnRolePlatform');
 
-        var custSection = document.getElementById('customerSection');
-        var admSection = document.getElementById('adminSection');
-        if (custSection) {
-            custSection.classList.toggle('hidden', isAdm);
-            custSection.style.display = isAdm ? 'none' : 'block';
-        }
-        if (admSection) {
-            admSection.classList.toggle('hidden', !isAdm);
-            admSection.style.display = isAdm ? 'block' : 'none';
-        }
+        if (btnUser) btnUser.className = isCust ? 'role-tab active-user' : 'role-tab';
+        if (btnBank) btnBank.className = isBank ? 'role-tab active-bank' : 'role-tab';
+        if (btnPlat) btnPlat.className = isPlat ? 'role-tab active-platform' : 'role-tab';
 
-        var roleTitle = document.getElementById('roleHeaderTitle');
-        if (roleTitle) {
-            roleTitle.textContent = isAdm ? 'Administrator Sign In' : 'Customer Sign In';
-        }
+        var custSec = document.getElementById('customerSection');
+        var bankSec = document.getElementById('bankAdminSection');
+        var platSec = document.getElementById('platformAdminSection');
 
-        var roleSub = document.getElementById('roleSubtitle');
-        if (roleSub) {
-            roleSub.textContent = isAdm 
-                ? 'Access the Bank Administrator Operations Portal' 
-                : 'Access your Personal Internet Banking Account';
+        if (custSec) {
+            custSec.classList.toggle('hidden', !isCust);
+            custSec.style.display = isCust ? 'block' : 'none';
+        }
+        if (bankSec) {
+            bankSec.classList.toggle('hidden', !isBank);
+            bankSec.style.display = isBank ? 'block' : 'none';
+        }
+        if (platSec) {
+            platSec.classList.toggle('hidden', !isPlat);
+            platSec.style.display = isPlat ? 'block' : 'none';
         }
 
-        var regLink = document.getElementById('registerLink');
-        if (regLink) {
-            regLink.setAttribute('href', '${pageContext.request.contextPath}/register.jsp?role=' + (isAdm ? 'admin' : 'user'));
+        var title = document.getElementById('roleHeaderTitle');
+        var subtitle = document.getElementById('roleSubtitle');
+        if (title && subtitle) {
+            if (isCust) {
+                title.textContent = 'Customer Sign In';
+                subtitle.textContent = 'Access your Personal Internet Banking Account';
+            } else if (isBank) {
+                title.textContent = 'Bank Administrator Sign In';
+                subtitle.textContent = 'Bank Operations: Underwrite Loans, Regulate Accounts & Manage Cards';
+            } else {
+                title.textContent = 'Platform Administrator Sign In';
+                subtitle.textContent = 'Platform Governance: Regulate Commissions & Partner Bank Rates';
+            }
         }
 
-        var navRegLink = document.getElementById('navRegisterLink');
-        if (navRegLink) {
-            navRegLink.setAttribute('href', '${pageContext.request.contextPath}/register.jsp?role=' + (isAdm ? 'admin' : 'user'));
-        }
-
-        var adminInput = document.getElementById('adminUsername');
-        var userInput = document.getElementById('email');
-        if (isAdm && adminInput) {
-            adminInput.focus();
-        } else if (!isAdm && userInput) {
-            userInput.focus();
+        var navReg = document.getElementById('navRegisterLink');
+        if (navReg) {
+            navReg.style.display = isCust ? 'inline-block' : 'none';
         }
     }
 
     function fillCustomerDemo() {
-        var email = document.getElementById('email');
-        var pass = document.getElementById('password');
-        if (email) email.value = 'rahul@gmail.com';
-        if (pass) pass.value = 'user123';
+        document.getElementById('email').value = 'rahul@gmail.com';
+        document.getElementById('password').value = 'user123';
     }
 
-    function fillAdminDemo() {
-        var user = document.getElementById('adminUsername');
-        var pass = document.getElementById('adminPassword');
-        if (user) user.value = 'admin@gmail.com';
-        if (pass) pass.value = 'admin123';
+    function fillBankAdminDemo() {
+        document.getElementById('bankAdminUsername').value = 'bankadmin@gmail.com';
+        document.getElementById('bankAdminPassword').value = 'admin123';
+    }
+
+    function fillSbiAdminDemo() {
+        document.getElementById('bankAdminUsername').value = 'sbi.admin@gmail.com';
+        document.getElementById('bankAdminPassword').value = 'admin123';
+    }
+
+    function fillPlatformAdminDemo() {
+        document.getElementById('platformUsername').value = 'admin@gmail.com';
+        document.getElementById('platformPassword').value = 'admin123';
     }
 
     window.addEventListener('DOMContentLoaded', function() {
         var app = document.getElementById('loginApp');
         var initialRole = (app && app.getAttribute('data-role')) ? app.getAttribute('data-role') : 'USER';
-        if (initialRole === 'ADMIN') {
-            setRole('ADMIN');
-        } else {
-            setRole('USER');
-        }
+        setPortalRole(initialRole);
     });
 </script>
 

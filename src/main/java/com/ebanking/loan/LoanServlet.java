@@ -31,9 +31,15 @@ public class LoanServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        // Check Admin - if admin navigates here, send to dedicated admin loans desk
+        // Check Bank Admin - send to dedicated bank admin loans desk
+        if (session != null && session.getAttribute("bankAdminId") != null) {
+            response.sendRedirect(request.getContextPath() + "/bank-admin/loans");
+            return;
+        }
+
+        // Platform admin cannot manage loans - redirect to platform commission dashboard
         if (session != null && session.getAttribute("adminId") != null) {
-            response.sendRedirect(request.getContextPath() + "/admin/loans");
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard?error=loans_managed_by_bank_admin");
             return;
         }
 
@@ -159,10 +165,10 @@ public class LoanServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // Action 1: Admin Loan Review (Approve / Reject)
+        // Action 1: Bank Admin Loan Review (Approve / Reject)
         if ("review".equalsIgnoreCase(action)) {
-            if (session == null || session.getAttribute("adminId") == null) {
-                response.sendRedirect(request.getContextPath() + "/login.jsp?role=admin");
+            if (session == null || session.getAttribute("bankAdminId") == null) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp?role=bank_admin");
                 return;
             }
             handleAdminReview(request, response);
@@ -297,7 +303,7 @@ public class LoanServlet extends HttpServlet {
         String remarks = request.getParameter("remarks");
 
         if (loanIdStr == null || decision == null) {
-            response.sendRedirect(request.getContextPath() + "/admin/loans");
+            response.sendRedirect(request.getContextPath() + "/bank-admin/loans");
             return;
         }
 
@@ -322,7 +328,7 @@ public class LoanServlet extends HttpServlet {
                             appNumber = rs.getString("application_number");
                         } else {
                             con.rollback();
-                            response.sendRedirect(request.getContextPath() + "/admin/loans?error=loan_not_pending");
+                            response.sendRedirect(request.getContextPath() + "/bank-admin/loans?error=loan_not_pending");
                             return;
                         }
                     }
@@ -364,7 +370,7 @@ public class LoanServlet extends HttpServlet {
                 }
 
                 con.commit();
-                response.sendRedirect(request.getContextPath() + "/admin/loans?success=loan_approved");
+                response.sendRedirect(request.getContextPath() + "/bank-admin/loans?success=loan_approved");
                 return;
 
             } else if ("REJECT".equalsIgnoreCase(decision)) {
@@ -375,13 +381,13 @@ public class LoanServlet extends HttpServlet {
                     ps.executeUpdate();
                 }
                 con.commit();
-                response.sendRedirect(request.getContextPath() + "/admin/loans?success=loan_rejected");
+                response.sendRedirect(request.getContextPath() + "/bank-admin/loans?success=loan_rejected");
                 return;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin/loans?error=" +
+            response.sendRedirect(request.getContextPath() + "/bank-admin/loans?error=" +
                     java.net.URLEncoder.encode(e.getMessage() != null ? e.getMessage() : "Review failed", "UTF-8"));
         }
     }

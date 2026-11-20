@@ -180,14 +180,10 @@
 
     <!-- Sub-navigation Bar -->
     <div class="admin-nav-bar">
-        <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">📊 Command Center</a>
-        <a href="${pageContext.request.contextPath}/admin/banks" class="nav-link active">🏛️ Partner Banks</a>
-        <a href="${pageContext.request.contextPath}/admin/customers" class="nav-link">👥 Customers</a>
-        <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-link">🏦 Bank Accounts</a>
-        <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link">💳 Transactions Ledger</a>
-        <a href="${pageContext.request.contextPath}/admin/loans" class="nav-link">📜 Loans Desk</a>
-        <a href="${pageContext.request.contextPath}/admin/cards" class="nav-link">🪪 Cards Desk</a>
-        <a href="${pageContext.request.contextPath}/admin/reports" class="nav-link">📈 Reports & Audit</a>
+        <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">📊 Commission Command Center</a>
+        <a href="${pageContext.request.contextPath}/admin/banks" class="nav-link active">🏛️ Partner Banks & Fee Rates</a>
+        <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link">💰 Commission Ledger</a>
+        <a href="${pageContext.request.contextPath}/admin/reports" class="nav-link">📈 Commission Analytics & Audit</a>
     </div>
 
     <!-- Feedback Alerts -->
