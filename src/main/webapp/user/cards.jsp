@@ -153,7 +153,11 @@
     </div>
 
     <!-- Feedback Alerts -->
-    <% if ("applied".equals(successParam)) { %>
+    <% if ("applied_pending".equals(successParam)) { %>
+        <div class="alert alert-warning" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+            ⏳ Card application submitted! Your card request is pending verification and confirmation by <strong>Bank Administrators</strong>.
+        </div>
+    <% } else if ("applied".equals(successParam)) { %>
         <div class="alert alert-success">
             ✅ New card issued successfully! Your virtual card is activated and ready for use.
         </div>
@@ -203,13 +207,20 @@
                     String accNum = (String) card.get("accountNumber");
                     String bName = (String) card.get("bankName");
                     BigDecimal limit = (BigDecimal) card.get("dailyLimit");
+                    boolean isPending = "PENDING".equalsIgnoreCase(status);
                     boolean isBlocked = "BLOCKED".equalsIgnoreCase(status);
                     boolean isCredit = "CREDIT".equalsIgnoreCase(type);
             %>
             <div>
                 <!-- Simulated Physical Card Widget -->
                 <div class="virtual-card <%= isCredit ? "card-credit" : "card-debit" %>">
-                    <% if (isBlocked) { %>
+                    <% if (isPending) { %>
+                        <div class="card-blocked-overlay" style="background: rgba(15, 23, 42, 0.88);">
+                            <span style="font-size: 2.2rem; margin-bottom: 4px;">⏳</span>
+                            <strong style="color: #fde047; letter-spacing: 1px;">PENDING CONFIRMATION</strong>
+                            <small style="opacity: 0.85;">Awaiting Bank Admin Approval</small>
+                        </div>
+                    <% } else if (isBlocked) { %>
                         <div class="card-blocked-overlay">
                             <span style="font-size: 2.2rem; margin-bottom: 4px;">🔒</span>
                             <strong style="color: #f87171; letter-spacing: 1px;">CARD BLOCKED</strong>
@@ -258,20 +269,26 @@
                         <span>Daily Limit: <strong><%= currencyFormat.format(limit != null ? limit : BigDecimal.ZERO) %></strong></span>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/card" method="post" style="margin: 0;">
-                        <input type="hidden" name="action" value="toggle_status">
-                        <input type="hidden" name="cardId" value="<%= cardId %>">
-                        <input type="hidden" name="currentStatus" value="<%= status %>">
-                        <% if (isBlocked) { %>
-                            <button type="submit" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; color: #16a34a; border-color: #86efac;">
-                                🔓 Unblock Card
-                            </button>
-                        <% } else { %>
-                            <button type="submit" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; color: #dc2626; border-color: #fca5a5;" onclick="return confirm('Lock and block this card?');">
-                                🔒 Block Card
-                            </button>
-                        <% } %>
-                    </form>
+                    <% if (isPending) { %>
+                        <span class="badge" style="background: #fef3c7; color: #92400e; padding: 6px 12px; font-weight: 700; border-radius: 6px;">
+                            ⏳ Pending Bank Admin Confirmation
+                        </span>
+                    <% } else { %>
+                        <form action="${pageContext.request.contextPath}/card" method="post" style="margin: 0;">
+                            <input type="hidden" name="action" value="toggle_status">
+                            <input type="hidden" name="cardId" value="<%= cardId %>">
+                            <input type="hidden" name="currentStatus" value="<%= status %>">
+                            <% if (isBlocked) { %>
+                                <button type="submit" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; color: #16a34a; border-color: #86efac;">
+                                    🔓 Unblock Card
+                                </button>
+                            <% } else { %>
+                                <button type="submit" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; color: #dc2626; border-color: #fca5a5;" onclick="return confirm('Lock and block this card?');">
+                                    🔒 Block Card
+                                </button>
+                            <% } %>
+                        </form>
+                    <% } %>
                 </div>
             </div>
             <%

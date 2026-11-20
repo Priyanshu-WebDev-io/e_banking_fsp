@@ -110,7 +110,7 @@
                     <% if (isUser) { %>
                         <!-- Navigation for Logged-in Customer -->
                         <li class="nav-item">
-                            <a class="nav-link text-white fw-semibold" href="${pageContext.request.contextPath}/user/dashboard.jsp">
+                            <a class="nav-link text-white fw-semibold" href="${pageContext.request.contextPath}/user/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </li>
@@ -198,7 +198,7 @@
                             <i class="bi bi-person-circle text-warning fs-5 align-middle me-1"></i>
                             Welcome, <%= loggedInFirstName != null ? loggedInFirstName : "Customer" %>
                         </span>
-                        <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-outline-light btn-sm fw-semibold">
+                        <a href="${pageContext.request.contextPath}/user/dashboard" class="btn btn-outline-light btn-sm fw-semibold">
                             <i class="bi bi-grid"></i> Dashboard
                         </a>
                         <a href="${pageContext.request.contextPath}/user/logout" class="btn btn-warning btn-sm fw-bold px-3 shadow-sm">
@@ -260,7 +260,7 @@
                     <!-- Contextual Hero Actions -->
                     <div class="d-flex flex-wrap gap-3 mt-4">
                         <% if (isUser) { %>
-                            <a href="${pageContext.request.contextPath}/user/dashboard.jsp" class="btn btn-warning btn-lg fw-bold px-4 shadow">
+                            <a href="${pageContext.request.contextPath}/user/dashboard" class="btn btn-warning btn-lg fw-bold px-4 shadow">
                                 <i class="bi bi-speedometer2"></i> Customer Dashboard
                             </a>
                             <a href="${pageContext.request.contextPath}/account/list" class="btn btn-light btn-lg fw-bold px-4 text-primary shadow">
@@ -309,7 +309,7 @@
             <div class="row g-4">
                 <!-- 1. Customer Banking Portal -->
                 <div class="col-md-4">
-                    <a href="${pageContext.request.contextPath}/<%= isUser ? "user/dashboard.jsp" : "login.jsp?role=user" %>" class="feature-card">
+                    <a href="${pageContext.request.contextPath}/<%= isUser ? "user/dashboard" : "login.jsp?role=user" %>" class="feature-card">
                         <div class="feature-icon bg-primary bg-opacity-10 text-primary">
                             <i class="bi bi-person-circle"></i>
                         </div>

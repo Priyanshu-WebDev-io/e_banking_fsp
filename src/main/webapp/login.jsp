@@ -1,5 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Redirect already logged-in users to their respective dashboard
+    String loggedOut = request.getParameter("loggedOut");
+    if (loggedOut == null && session != null) {
+        if (session.getAttribute("userId") != null) {
+            response.sendRedirect(request.getContextPath() + "/user/dashboard");
+            return;
+        } else if (session.getAttribute("bankAdminId") != null) {
+            response.sendRedirect(request.getContextPath() + "/bank-admin/dashboard");
+            return;
+        } else if (session.getAttribute("adminId") != null) {
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            return;
+        }
+    }
+
     String roleParam = request.getParameter("role");
     String selectedRole = (String) request.getAttribute("selectedRole");
     if (selectedRole == null) {
@@ -9,32 +24,40 @@
         selectedRole = "USER";
     }
     selectedRole = selectedRole.toUpperCase();
-    if ("ADMIN".equals(selectedRole)) {
+
+    if ("ADMIN".equals(selectedRole) || "PLATFORM".equals(selectedRole) || "PLATFORM_ADMIN".equals(selectedRole)) {
         selectedRole = "PLATFORM_ADMIN";
+    } else if ("BANK".equals(selectedRole) || "BANK_ADMIN".equals(selectedRole) || "BANKADMIN".equals(selectedRole)) {
+        selectedRole = "BANK_ADMIN";
+    } else {
+        selectedRole = "USER";
     }
 
-    boolean isCustomer = "USER".equals(selectedRole) || "CUSTOMER".equals(selectedRole);
-    boolean isBankAdmin = "BANK_ADMIN".equals(selectedRole) || "BANKADMIN".equals(selectedRole);
-    boolean isPlatformAdmin = "PLATFORM_ADMIN".equals(selectedRole) || "PLATFORM".equals(selectedRole);
+    boolean isCustomer = "USER".equals(selectedRole);
+    boolean isBankAdmin = "BANK_ADMIN".equals(selectedRole);
+    boolean isPlatformAdmin = "PLATFORM_ADMIN".equals(selectedRole);
 
     String error = (String) request.getAttribute("error");
     if (error == null && "true".equalsIgnoreCase(request.getParameter("error"))) {
         error = "Invalid credentials. Please verify your details and try again.";
     }
     String registered = request.getParameter("registered");
-    String loggedOut = request.getParameter("loggedOut");
 
-    String headerTitle = isCustomer ? "Customer Sign In" : (isBankAdmin ? "Bank Administrator Sign In" : "Platform Administrator Sign In");
+    String headerTitle = isCustomer 
+        ? "Customer Sign In" 
+        : (isBankAdmin ? "Bank Administrator Operations" : "Platform Commission Governance");
     String headerSubtitle = isCustomer 
-        ? "Access your Personal Internet Banking Account" 
-        : (isBankAdmin ? "Bank Operations: Underwrite Loans, Regulate Accounts & Manage Cards" : "Platform Governance: Regulate Commissions & Partner Bank Rates");
+        ? "Access your personal accounts, execute transfers, manage cards, and apply for loans." 
+        : (isBankAdmin 
+            ? "Institutional bank console: Underwrite loans, activate customer accounts, and oversee cards." 
+            : "Platform revenue authority: Regulate partner bank fee rates, monitor platform revenue, and audit ledgers.");
 %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - E-Banking</title>
+    <title>Login - E-Banking Multi-Role Portal</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
         .role-switch-container {
@@ -55,7 +78,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 10px 12px;
+            padding: 11px 12px;
             font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-muted);
@@ -67,21 +90,50 @@
         }
         .role-tab:hover {
             color: var(--primary);
+            background: rgba(255, 255, 255, 0.5);
         }
         .role-tab.active-user {
             background: #ffffff;
             color: #2563eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+            border: 1px solid #dbeafe;
         }
         .role-tab.active-bank {
             background: #ffffff;
             color: #059669;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
+            border: 1px solid #d1fae5;
         }
         .role-tab.active-platform {
             background: #ffffff;
             color: #991b1b;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(153, 27, 27, 0.15);
+            border: 1px solid #fee2e2;
+        }
+        .role-banner-tag {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tag-user {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        .tag-bank {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .tag-platform {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
         .btn-bank-admin {
             background-color: #059669;
@@ -93,6 +145,7 @@
             border-radius: 8px;
             border: none;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
         .btn-bank-admin:hover {
             background-color: #047857;
@@ -108,34 +161,67 @@
             border-radius: 8px;
             border: none;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
         .btn-platform-admin:hover {
             background-color: #7f1d1d;
             color: #ffffff;
         }
-        .demo-box {
-            margin-top: 16px;
-            padding: 10px 14px;
+        .demo-chip-group {
+            margin-top: 18px;
             background-color: #f8fafc;
-            border: 1px dashed var(--border);
-            border-radius: 8px;
-            font-size: 0.84rem;
-            color: var(--text-muted);
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 12px;
         }
-        .demo-box:hover {
-            background-color: #f1f5f9;
+        .demo-chip-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .demo-chips {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .demo-chip {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 0.82rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .demo-chip:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            transform: translateX(2px);
+        }
+        .demo-chip code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #0f172a;
         }
         .portal-direct-links {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 14px;
+            margin-top: 22px;
             padding-top: 16px;
             border-top: 1px solid var(--border);
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             flex-wrap: wrap;
         }
         .portal-direct-links a {
@@ -160,9 +246,14 @@
     </div>
 
     <div class="card">
-        <div class="brand-header">
-            <h2 id="roleHeaderTitle"><%= headerTitle %></h2>
-            <p id="roleSubtitle" style="font-size: 0.9rem; color: #64748b;"><%= headerSubtitle %></p>
+        <div class="brand-header" style="text-align: center;">
+            <div id="roleTagContainer">
+                <span class="role-banner-tag <%= isCustomer ? "tag-user" : (isBankAdmin ? "tag-bank" : "tag-platform") %>" id="roleTag">
+                    <%= isCustomer ? "Personal Banking" : (isBankAdmin ? "Institutional Bank Desk" : "Platform Governance") %>
+                </span>
+            </div>
+            <h2 id="roleHeaderTitle" style="margin-bottom: 6px;"><%= headerTitle %></h2>
+            <p id="roleSubtitle" style="font-size: 0.9rem; color: #64748b; margin: 0 auto; max-width: 440px;"><%= headerSubtitle %></p>
         </div>
 
         <!-- 3-Role Selector Switcher -->
@@ -187,7 +278,7 @@
 
         <% if ("true".equals(registered)) { %>
             <div class="alert alert-success" style="margin-bottom: 16px;">
-                Registration completed successfully! Please login with your credentials below.
+                ✅ Registration completed successfully! Please login with your credentials below.
             </div>
         <% } %>
 
@@ -213,18 +304,32 @@
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">Login as Customer</button>
             </form>
 
-            <div class="demo-box" onclick="fillCustomerDemo()" title="Click to autofill credentials">
-                <strong>Demo Customer:</strong> <code>rahul@gmail.com</code> / <code>user123</code>
+            <div class="demo-chip-group">
+                <div class="demo-chip-title">
+                    <span>⚡ Quick Autofill Demo Customers</span>
+                    <span style="font-weight: normal; font-size: 0.72rem;">Click to load</span>
+                </div>
+                <div class="demo-chips">
+                    <div class="demo-chip" onclick="fillCustomerDemo('rahul@gmail.com', 'user123')">
+                        <span>👤 <strong>Rahul Sharma</strong> (SBI / Mumbai)</span>
+                        <code>rahul@gmail.com / user123</code>
+                    </div>
+                    <div class="demo-chip" onclick="fillCustomerDemo('ananya@gmail.com', 'user123')">
+                        <span>👤 <strong>Ananya Patel</strong> (ICICI / Delhi)</span>
+                        <code>ananya@gmail.com / user123</code>
+                    </div>
+                </div>
             </div>
 
             <div class="auth-links" style="margin-top: 16px; text-align: center; font-size: 0.88rem;">
-                New customer? <a href="${pageContext.request.contextPath}/register.jsp?role=user">Open Bank Account</a>
+                New customer? <a href="${pageContext.request.contextPath}/register.jsp?role=user">Open a Bank Account</a>
             </div>
         </div>
 
         <!-- 2. Bank Admin Login Form (Accounts, Loans, Cards) -->
         <div id="bankAdminSection" class="<%= !isBankAdmin ? "hidden" : "" %>">
             <form action="${pageContext.request.contextPath}/bank-admin/login" method="post">
+                <input type="hidden" name="from" value="central">
                 <div class="form-group">
                     <label for="bankAdminUsername">Bank Admin Username or Email</label>
                     <input type="text" id="bankAdminUsername" name="username" placeholder="e.g. bankadmin@gmail.com or sbi_admin" required>
@@ -238,12 +343,34 @@
                 <button type="submit" class="btn-bank-admin">Sign In as Bank Administrator</button>
             </form>
 
-            <div class="demo-box" onclick="fillBankAdminDemo()" title="Click to autofill Lead Bank Admin">
-                <strong>Demo Lead Bank Admin:</strong> <code>bankadmin@gmail.com</code> / <code>admin123</code>
+            <div class="demo-chip-group">
+                <div class="demo-chip-title">
+                    <span>⚡ Quick Autofill Institutional Admins</span>
+                    <span style="font-weight: normal; font-size: 0.72rem;">Click to load</span>
+                </div>
+                <div class="demo-chips">
+                    <div class="demo-chip" onclick="fillBankAdminDemo('bankadmin@gmail.com', 'admin123')">
+                        <span>🏦 <strong>Lead Bank Admin</strong> (All Partner Banks)</span>
+                        <code>bankadmin@gmail.com / admin123</code>
+                    </div>
+                    <div class="demo-chip" onclick="fillBankAdminDemo('sbi.admin@gmail.com', 'admin123')">
+                        <span>🏛️ <strong>SBI Administrator</strong> (State Bank of India)</span>
+                        <code>sbi.admin@gmail.com / admin123</code>
+                    </div>
+                    <div class="demo-chip" onclick="fillBankAdminDemo('hdfc.admin@gmail.com', 'admin123')">
+                        <span>🏛️ <strong>HDFC Administrator</strong> (HDFC Bank)</span>
+                        <code>hdfc.admin@gmail.com / admin123</code>
+                    </div>
+                    <div class="demo-chip" onclick="fillBankAdminDemo('icici.admin@gmail.com', 'admin123')">
+                        <span>🏛️ <strong>ICICI Administrator</strong> (ICICI Bank)</span>
+                        <code>icici.admin@gmail.com / admin123</code>
+                    </div>
+                </div>
             </div>
-            <div class="demo-box" onclick="fillSbiAdminDemo()" style="margin-top: 6px;" title="Click to autofill SBI Bank Admin">
-                <strong>Demo SBI Bank Admin:</strong> <code>sbi.admin@gmail.com</code> / <code>admin123</code>
-            </div>
+
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 14px; text-align: center;">
+                Bank administrators underwrite loan applications, regulate customer accounts, and oversee payment cards.
+            </p>
         </div>
 
         <!-- 3. Platform Admin Login Form (Commissions Only) -->
@@ -262,15 +389,34 @@
                 <button type="submit" class="btn-platform-admin">Sign In as Platform Administrator</button>
             </form>
 
-            <div class="demo-box" onclick="fillPlatformAdminDemo()" title="Click to autofill Platform Admin">
-                <strong>Demo Platform Admin:</strong> <code>admin@gmail.com</code> / <code>admin123</code>
+            <div class="demo-chip-group">
+                <div class="demo-chip-title">
+                    <span>⚡ Quick Autofill Platform Admins</span>
+                    <span style="font-weight: normal; font-size: 0.72rem;">Click to load</span>
+                </div>
+                <div class="demo-chips">
+                    <div class="demo-chip" onclick="fillPlatformAdminDemo('admin@gmail.com', 'admin123')">
+                        <span>🛡️ <strong>Platform Admin</strong> (Commission Authority)</span>
+                        <code>admin@gmail.com / admin123</code>
+                    </div>
+                    <div class="demo-chip" onclick="fillPlatformAdminDemo('priyanshu.admin@gmail.com', 'admin123')">
+                        <span>🛡️ <strong>Priyanshu (Platform Admin)</strong></span>
+                        <code>priyanshu.admin@gmail.com / admin123</code>
+                    </div>
+                </div>
             </div>
+
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 14px; text-align: center;">
+                Platform governance strictly controls partner bank transaction fee rates, commission yields, and audit ledgers.
+            </p>
         </div>
 
         <div class="portal-direct-links">
-            <a href="${pageContext.request.contextPath}/bank-admin/login.jsp">🏦 Dedicated Bank Admin Portal</a>
+            <a href="${pageContext.request.contextPath}/index.jsp">🏠 Platform Home</a>
             <span>&bull;</span>
-            <a href="${pageContext.request.contextPath}/admin/login">🛡️ Platform Commission Console</a>
+            <a href="${pageContext.request.contextPath}/bank-admin/login.jsp">🏦 Standalone Bank Portal</a>
+            <span>&bull;</span>
+            <a href="${pageContext.request.contextPath}/register.jsp?role=user">👤 Customer Registration</a>
         </div>
     </div>
 </div>
@@ -306,18 +452,26 @@
             platSec.style.display = isPlat ? 'block' : 'none';
         }
 
+        var tag = document.getElementById('roleTag');
         var title = document.getElementById('roleHeaderTitle');
         var subtitle = document.getElementById('roleSubtitle');
-        if (title && subtitle) {
+
+        if (tag && title && subtitle) {
             if (isCust) {
+                tag.className = 'role-banner-tag tag-user';
+                tag.textContent = 'Personal Banking';
                 title.textContent = 'Customer Sign In';
-                subtitle.textContent = 'Access your Personal Internet Banking Account';
+                subtitle.textContent = 'Access your personal accounts, execute transfers, manage cards, and apply for loans.';
             } else if (isBank) {
-                title.textContent = 'Bank Administrator Sign In';
-                subtitle.textContent = 'Bank Operations: Underwrite Loans, Regulate Accounts & Manage Cards';
+                tag.className = 'role-banner-tag tag-bank';
+                tag.textContent = 'Institutional Bank Desk';
+                title.textContent = 'Bank Administrator Operations';
+                subtitle.textContent = 'Institutional bank console: Underwrite loans, activate customer accounts, and oversee cards.';
             } else {
-                title.textContent = 'Platform Administrator Sign In';
-                subtitle.textContent = 'Platform Governance: Regulate Commissions & Partner Bank Rates';
+                tag.className = 'role-banner-tag tag-platform';
+                tag.textContent = 'Platform Governance';
+                title.textContent = 'Platform Commission Governance';
+                subtitle.textContent = 'Platform revenue authority: Regulate partner bank fee rates, monitor platform revenue, and audit ledgers.';
             }
         }
 
@@ -325,26 +479,33 @@
         if (navReg) {
             navReg.style.display = isCust ? 'inline-block' : 'none';
         }
+
+        // Update URL query string without reloading page
+        if (window.history && window.history.replaceState) {
+            var newUrl = window.location.pathname + '?role=' + (isCust ? 'user' : (isBank ? 'bank_admin' : 'platform_admin'));
+            window.history.replaceState({ role: role }, '', newUrl);
+        }
     }
 
-    function fillCustomerDemo() {
-        document.getElementById('email').value = 'rahul@gmail.com';
-        document.getElementById('password').value = 'user123';
+    function fillCustomerDemo(email, password) {
+        setPortalRole('USER');
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
+        document.getElementById('email').focus();
     }
 
-    function fillBankAdminDemo() {
-        document.getElementById('bankAdminUsername').value = 'bankadmin@gmail.com';
-        document.getElementById('bankAdminPassword').value = 'admin123';
+    function fillBankAdminDemo(username, password) {
+        setPortalRole('BANK_ADMIN');
+        document.getElementById('bankAdminUsername').value = username;
+        document.getElementById('bankAdminPassword').value = password;
+        document.getElementById('bankAdminUsername').focus();
     }
 
-    function fillSbiAdminDemo() {
-        document.getElementById('bankAdminUsername').value = 'sbi.admin@gmail.com';
-        document.getElementById('bankAdminPassword').value = 'admin123';
-    }
-
-    function fillPlatformAdminDemo() {
-        document.getElementById('platformUsername').value = 'admin@gmail.com';
-        document.getElementById('platformPassword').value = 'admin123';
+    function fillPlatformAdminDemo(username, password) {
+        setPortalRole('PLATFORM_ADMIN');
+        document.getElementById('platformUsername').value = username;
+        document.getElementById('platformPassword').value = password;
+        document.getElementById('platformUsername').focus();
     }
 
     window.addEventListener('DOMContentLoaded', function() {

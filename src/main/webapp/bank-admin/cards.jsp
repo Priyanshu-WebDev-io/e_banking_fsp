@@ -16,6 +16,9 @@
     Integer totalCards = (Integer) request.getAttribute("totalCards");
     if (totalCards == null) totalCards = 0;
 
+    Integer pendingCards = (Integer) request.getAttribute("pendingCards");
+    if (pendingCards == null) pendingCards = 0;
+
     Integer activeCards = (Integer) request.getAttribute("activeCards");
     if (activeCards == null) activeCards = 0;
 
@@ -40,7 +43,7 @@
     <style>
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -135,14 +138,24 @@
         <a href="${pageContext.request.contextPath}/bank-admin/dashboard" class="nav-link">📊 Operations Command</a>
         <a href="${pageContext.request.contextPath}/bank-admin/accounts" class="nav-link">🏦 Bank Accounts</a>
         <a href="${pageContext.request.contextPath}/bank-admin/loans" class="nav-link">📜 Loans Desk</a>
-        <a href="${pageContext.request.contextPath}/bank-admin/cards" class="nav-link active">🪪 Cards Desk</a>
+        <a href="${pageContext.request.contextPath}/bank-admin/cards" class="nav-link active">
+            🪪 Cards Desk <% if (pendingCards > 0) { %><span class="badge" style="background: #f59e0b; color: #fff; padding: 2px 6px; font-size: 0.72rem; border-radius: 9999px;"><%= pendingCards %></span><% } %>
+        </a>
         <a href="${pageContext.request.contextPath}/bank-admin/customers" class="nav-link">👥 Customer Directory</a>
     </div>
 
     <!-- Feedback Alerts -->
-    <% if ("status_updated".equals(successParam)) { %>
+    <% if ("card_confirmed".equals(successParam)) { %>
         <div class="alert alert-success" style="margin-bottom: 20px;">
-            ✅ Card status has been updated successfully.
+            ✅ Payment card has been confirmed & activated. Customer may now use the card.
+        </div>
+    <% } else if ("card_rejected".equals(successParam)) { %>
+        <div class="alert alert-warning" style="margin-bottom: 20px;">
+            Card request has been rejected by administrator.
+        </div>
+    <% } else if ("status_updated".equals(successParam)) { %>
+        <div class="alert alert-success" style="margin-bottom: 20px;">
+            ✅ Card lock status has been updated successfully.
         </div>
     <% } else if (errorParam != null) { %>
         <div class="alert alert-danger" style="margin-bottom: 20px;">
@@ -153,10 +166,10 @@
     <!-- KPI Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #eff6ff; color: #1d4ed8;">🪪</div>
+            <div class="stat-icon" style="background: #fef3c7; color: #d97706;">⏳</div>
             <div class="stat-info">
-                <h4>Total Issued Cards</h4>
-                <div class="stat-value"><%= totalCards %></div>
+                <h4>Pending Confirmation</h4>
+                <div class="stat-value" style="color: #b45309;"><%= pendingCards %></div>
             </div>
         </div>
         <div class="stat-card">
@@ -171,6 +184,13 @@
             <div class="stat-info">
                 <h4>Blocked Cards</h4>
                 <div class="stat-value" style="color: #991b1b;"><%= blockedCards %></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #eff6ff; color: #1d4ed8;">🪪</div>
+            <div class="stat-info">
+                <h4>Total Issued Cards</h4>
+                <div class="stat-value"><%= totalCards %></div>
             </div>
         </div>
     </div>
@@ -188,17 +208,19 @@
                         <th>Expiry</th>
                         <th>Daily Limit</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Admin Decision</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (cards != null && !cards.isEmpty()) {
                         for (Map<String, Object> c : cards) {
                             String st = (String) c.get("status");
+                            boolean isPending = "PENDING".equalsIgnoreCase(st);
                             boolean isActive = "ACTIVE".equalsIgnoreCase(st);
+                            boolean isBlocked = "BLOCKED".equalsIgnoreCase(st);
                             int cardId = (Integer) c.get("cardId");
                     %>
-                        <tr>
+                        <tr style="<%= isPending ? "background-color: #fffbeb;" : "" %>">
                             <td>
                                 <span class="card-number-badge"><%= c.get("maskedNumber") %></span>
                             </td>
@@ -218,18 +240,40 @@
                             <td style="font-family: monospace; font-weight: 700;"><%= c.get("expiryDate") %></td>
                             <td style="font-weight: 700; color: #166534;"><%= currencyFormat.format(c.get("dailyLimit")) %></td>
                             <td>
-                                <span class="badge" style="<%= isActive ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;" %>">
-                                    <%= st %>
+                                <span class="badge" style="<%= isPending ? "background: #fef3c7; color: #92400e;" : (isActive ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;") %>">
+                                    <%= isPending ? "⏳ PENDING" : st %>
                                 </span>
                             </td>
                             <td>
-                                <form action="${pageContext.request.contextPath}/bank-admin/cards" method="post" style="display: inline-block;">
-                                    <input type="hidden" name="cardId" value="<%= cardId %>">
-                                    <input type="hidden" name="action" value="toggle">
-                                    <button type="submit" class="btn <%= isActive ? "btn-danger" : "btn-success" %>" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Toggle status of this card?');">
-                                        <%= isActive ? "🔒 Block Card" : "🔓 Unblock Card" %>
-                                    </button>
-                                </form>
+                                <% if (isPending) { %>
+                                    <form action="${pageContext.request.contextPath}/bank-admin/cards" method="post" style="display: flex; gap: 6px;">
+                                        <input type="hidden" name="cardId" value="<%= cardId %>">
+                                        <button type="submit" name="action" value="confirm" class="btn btn-success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Confirm and activate this card for the customer?');">
+                                            ✅ Confirm Card
+                                        </button>
+                                        <button type="submit" name="action" value="reject" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Reject this card request?');">
+                                            ❌ Reject
+                                        </button>
+                                    </form>
+                                <% } else if (isActive) { %>
+                                    <form action="${pageContext.request.contextPath}/bank-admin/cards" method="post" style="display: inline-block;">
+                                        <input type="hidden" name="cardId" value="<%= cardId %>">
+                                        <input type="hidden" name="action" value="toggle">
+                                        <button type="submit" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Lock and block this card?');">
+                                            🔒 Block Card
+                                        </button>
+                                    </form>
+                                <% } else if (isBlocked) { %>
+                                    <form action="${pageContext.request.contextPath}/bank-admin/cards" method="post" style="display: inline-block;">
+                                        <input type="hidden" name="cardId" value="<%= cardId %>">
+                                        <input type="hidden" name="action" value="toggle">
+                                        <button type="submit" class="btn btn-success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Unblock this card?');">
+                                            🔓 Unblock Card
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <span style="font-size: 0.8rem; color: #64748b;">Archived</span>
+                                <% } %>
                             </td>
                         </tr>
                     <%  }

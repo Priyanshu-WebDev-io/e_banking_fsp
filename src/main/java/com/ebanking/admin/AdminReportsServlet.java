@@ -23,8 +23,10 @@ import java.util.Map;
 
 /**
  * Platform Admin Commission Reports Servlet:
- * Strictly focuses on Platform Commission yield, revenue generated per partner bank,
- * and commission transaction audits.
+ * Strictly focuses on:
+ * 1. Commissions on Loans Sanctioned
+ * 2. Commissions on Transactions Being Done
+ * 3. Bank-Related Commissions & Institutional Yields
  */
 @WebServlet("/admin/reports")
 public class AdminReportsServlet extends HttpServlet {
@@ -40,6 +42,11 @@ public class AdminReportsServlet extends HttpServlet {
         }
 
         BigDecimal totalCommissions = BigDecimal.ZERO;
+        BigDecimal loanCommissions = BigDecimal.ZERO;
+        int loanCommissionCount = 0;
+        BigDecimal transCommissions = BigDecimal.ZERO;
+        int transCommissionCount = 0;
+
         BigDecimal totalVolume = BigDecimal.ZERO;
         int totalTransactions = 0;
         int totalBanks = 0;
@@ -50,7 +57,7 @@ public class AdminReportsServlet extends HttpServlet {
 
         try (Connection con = DBConnection.getConnection()) {
 
-            // 1. Total Platform Commissions & Transaction Volumes
+            // 1. Total Platform Commissions
             String commMetricSql = "SELECT COALESCE(SUM(commission_amount), 0) FROM commissions";
             try (PreparedStatement ps = con.prepareStatement(commMetricSql);
                  ResultSet rs = ps.executeQuery()) {
@@ -59,6 +66,37 @@ public class AdminReportsServlet extends HttpServlet {
                 }
             }
 
+            // 1a. Commissions on Loans Sanctioned
+            String loanCommSql = """
+                    SELECT COALESCE(SUM(c.commission_amount), 0), COUNT(c.commission_id)
+                    FROM commissions c
+                    JOIN transactions t ON c.transaction_id = t.transaction_id
+                    WHERE t.description LIKE '%Loan Disbursal%'
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(loanCommSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    loanCommissions = rs.getBigDecimal(1);
+                    loanCommissionCount = rs.getInt(2);
+                }
+            }
+
+            // 1b. Commissions on Transactions Being Done
+            String transCommSql = """
+                    SELECT COALESCE(SUM(c.commission_amount), 0), COUNT(c.commission_id)
+                    FROM commissions c
+                    JOIN transactions t ON c.transaction_id = t.transaction_id
+                    WHERE t.description NOT LIKE '%Loan Disbursal%'
+                    """;
+            try (PreparedStatement ps = con.prepareStatement(transCommSql);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    transCommissions = rs.getBigDecimal(1);
+                    transCommissionCount = rs.getInt(2);
+                }
+            }
+
+            // 2. Gross Transaction Volume & Count
             String transMetricSql = "SELECT COUNT(*), COALESCE(SUM(amount), 0) FROM transactions";
             try (PreparedStatement ps = con.prepareStatement(transMetricSql);
                  ResultSet rs = ps.executeQuery()) {
@@ -73,7 +111,7 @@ public class AdminReportsServlet extends HttpServlet {
                         .multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP);
             }
 
-            // 2. Institutional Breakdown per Partner Bank
+            // 3. Institutional Bank-Related Commission Breakdown
             String bankBreakdownSql = """
                     SELECT b.bank_id, b.bank_name, b.bank_code, b.commission_rate, b.status,
                            (SELECT COUNT(*) FROM accounts a WHERE a.bank_id = b.bank_id) AS account_count,
@@ -83,11 +121,13 @@ public class AdminReportsServlet extends HttpServlet {
                             JOIN transactions t ON c.transaction_id = t.transaction_id
                             JOIN accounts fa ON t.from_account_id = fa.account_id
                             WHERE fa.bank_id = b.bank_id) AS total_commissions_generated,
-                           (SELECT COUNT(c.commission_id)
+                           (SELECT COALESCE(SUM(c.commission_amount), 0)
                             FROM commissions c
                             JOIN transactions t ON c.transaction_id = t.transaction_id
-                            JOIN accounts fa ON t.from_account_id = fa.account_id
-                            WHERE fa.bank_id = b.bank_id) AS trans_count
+                            WHERE c.bank_id = b.bank_id AND t.description LIKE '%Loan Disbursal%') AS loan_commissions_generated,
+                           (SELECT COUNT(c.commission_id)
+                            FROM commissions c
+                            WHERE c.bank_id = b.bank_id) AS trans_count
                     FROM banks b
                     ORDER BY total_commissions_generated DESC, b.bank_id ASC
                     """;
@@ -103,17 +143,18 @@ public class AdminReportsServlet extends HttpServlet {
                     row.put("accountCount", rs.getInt("account_count"));
                     row.put("totalDeposits", rs.getBigDecimal("total_bank_deposits"));
                     row.put("commissionsGenerated", rs.getBigDecimal("total_commissions_generated"));
+                    row.put("loanCommissionsGenerated", rs.getBigDecimal("loan_commissions_generated"));
                     row.put("transCount", rs.getInt("trans_count"));
                     bankBreakdown.add(row);
                 }
             }
             totalBanks = bankBreakdown.size();
 
-            // 3. Top Commission Generating Transactions
+            // 4. Top Commission Generating Transactions (both Loans & Regular)
             String topCommSql = """
                     SELECT c.commission_id, c.commission_rate, c.commission_amount, c.created_at,
-                           t.reference_number, t.amount, t.transaction_type,
-                           COALESCE(fb.bank_name, 'Partner Bank') AS from_bank_name,
+                           t.reference_number, t.amount, t.transaction_type, t.description,
+                           COALESCE(fb.bank_name, b.bank_name, 'Partner Bank') AS from_bank_name,
                            COALESCE(tb.bank_name, 'Partner Bank') AS to_bank_name
                     FROM commissions c
                     JOIN transactions t ON c.transaction_id = t.transaction_id
@@ -121,7 +162,8 @@ public class AdminReportsServlet extends HttpServlet {
                     LEFT JOIN banks fb ON fa.bank_id = fb.bank_id
                     LEFT JOIN accounts ta ON t.to_account_id = ta.account_id
                     LEFT JOIN banks tb ON ta.bank_id = tb.bank_id
-                    ORDER BY c.commission_amount DESC LIMIT 15
+                    LEFT JOIN banks b ON c.bank_id = b.bank_id
+                    ORDER BY c.commission_amount DESC LIMIT 20
                     """;
             try (PreparedStatement ps = con.prepareStatement(topCommSql);
                  ResultSet rs = ps.executeQuery()) {
@@ -136,6 +178,11 @@ public class AdminReportsServlet extends HttpServlet {
                     r.put("fromBankName", rs.getString("from_bank_name"));
                     r.put("toBankName", rs.getString("to_bank_name"));
                     r.put("createdAt", rs.getTimestamp("created_at"));
+
+                    String desc = rs.getString("description");
+                    boolean isLoan = desc != null && desc.contains("Loan Disbursal");
+                    r.put("sourceType", isLoan ? "LOAN_SANCTION" : "TRANSACTION");
+                    r.put("description", desc);
                     topCommissionTransactions.add(r);
                 }
             }
@@ -146,6 +193,10 @@ public class AdminReportsServlet extends HttpServlet {
         }
 
         request.setAttribute("totalCommissions", totalCommissions != null ? totalCommissions : BigDecimal.ZERO);
+        request.setAttribute("loanCommissions", loanCommissions != null ? loanCommissions : BigDecimal.ZERO);
+        request.setAttribute("loanCommissionCount", loanCommissionCount);
+        request.setAttribute("transCommissions", transCommissions != null ? transCommissions : BigDecimal.ZERO);
+        request.setAttribute("transCommissionCount", transCommissionCount);
         request.setAttribute("totalVolume", totalVolume != null ? totalVolume : BigDecimal.ZERO);
         request.setAttribute("totalTransactions", totalTransactions);
         request.setAttribute("totalBanks", totalBanks);

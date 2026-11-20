@@ -26,7 +26,12 @@ public class BankAdminLoginServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/bank-admin/dashboard");
             return;
         }
-        request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+        String from = request.getParameter("from");
+        if ("bank_portal".equalsIgnoreCase(from)) {
+            request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?role=bank_admin");
+        }
     }
 
     @Override
@@ -37,12 +42,19 @@ public class BankAdminLoginServlet extends HttpServlet {
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        String from = request.getParameter("from");
+        boolean fromStandalone = "bank_portal".equalsIgnoreCase(from);
 
         if (username == null || username.trim().isEmpty() ||
             password == null || password.trim().isEmpty()) {
 
             request.setAttribute("error", "Please provide both bank admin username/email and password.");
-            request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            if (fromStandalone) {
+                request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            } else {
+                request.setAttribute("selectedRole", "BANK_ADMIN");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+            }
             return;
         }
 
@@ -97,12 +109,22 @@ public class BankAdminLoginServlet extends HttpServlet {
             }
 
             request.setAttribute("error", "Invalid bank administrator credentials. Please try again.");
-            request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            if (fromStandalone) {
+                request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            } else {
+                request.setAttribute("selectedRole", "BANK_ADMIN");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+            }
 
         } catch (SQLException e) {
             log("Bank Admin login error", e);
             request.setAttribute("error", "Database connection error: " + e.getMessage());
-            request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            if (fromStandalone) {
+                request.getRequestDispatcher("/bank-admin/login.jsp").forward(request, response);
+            } else {
+                request.setAttribute("selectedRole", "BANK_ADMIN");
+                request.getRequestDispatcher("/login.jsp").forward(request, response);
+            }
         }
     }
 }

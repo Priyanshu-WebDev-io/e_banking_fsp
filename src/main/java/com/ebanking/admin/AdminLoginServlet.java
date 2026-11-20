@@ -42,7 +42,7 @@ public class AdminLoginServlet extends HttpServlet {
             password == null || password.trim().isEmpty()) {
 
             request.setAttribute("error", "Please provide both admin username and password.");
-            request.setAttribute("selectedRole", "ADMIN");
+            request.setAttribute("selectedRole", "PLATFORM_ADMIN");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -75,7 +75,7 @@ public class AdminLoginServlet extends HttpServlet {
                         session.setAttribute("adminUsername", rs.getString("username"));
                         session.setAttribute("adminName", rs.getString("full_name"));
                         session.setAttribute("adminEmail", rs.getString("email"));
-                        session.setAttribute("role", "ADMIN");
+                        session.setAttribute("role", "PLATFORM_ADMIN");
 
                         response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                         return;
@@ -84,13 +84,13 @@ public class AdminLoginServlet extends HttpServlet {
             }
 
             request.setAttribute("error", "Invalid administrator credentials. Please try again.");
-            request.setAttribute("selectedRole", "ADMIN");
+            request.setAttribute("selectedRole", "PLATFORM_ADMIN");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
 
         } catch (SQLException e) {
             log("Admin login error", e);
             request.setAttribute("error", "Database connection failed. Please contact technical support.");
-            request.setAttribute("selectedRole", "ADMIN");
+            request.setAttribute("selectedRole", "PLATFORM_ADMIN");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }

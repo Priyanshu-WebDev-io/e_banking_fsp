@@ -13,6 +13,18 @@
     BigDecimal totalCommissions = (BigDecimal) request.getAttribute("totalCommissions");
     if (totalCommissions == null) totalCommissions = BigDecimal.ZERO;
 
+    BigDecimal loanCommissions = (BigDecimal) request.getAttribute("loanCommissions");
+    if (loanCommissions == null) loanCommissions = BigDecimal.ZERO;
+
+    Integer loanCommissionCount = (Integer) request.getAttribute("loanCommissionCount");
+    if (loanCommissionCount == null) loanCommissionCount = 0;
+
+    BigDecimal transCommissions = (BigDecimal) request.getAttribute("transCommissions");
+    if (transCommissions == null) transCommissions = BigDecimal.ZERO;
+
+    Integer transCommissionCount = (Integer) request.getAttribute("transCommissionCount");
+    if (transCommissionCount == null) transCommissionCount = 0;
+
     BigDecimal totalVolume = (BigDecimal) request.getAttribute("totalVolume");
     if (totalVolume == null) totalVolume = BigDecimal.ZERO;
 
@@ -190,19 +202,30 @@
 
     <!-- Platform Commission KPI Stats -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" style="border-left: 4px solid #059669;">
             <div class="stat-icon" style="background-color: #ecfdf5; color: #059669;">💰</div>
             <div class="stat-info">
                 <h4>Total Platform Commissions</h4>
                 <div class="stat-value" style="color: #059669; font-size: 1.7rem;"><%= currencyFormat.format(totalCommissions) %></div>
+                <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">All institutional revenue</div>
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: #eff6ff; color: #1d4ed8;">💳</div>
+        <div class="stat-card" style="border-left: 4px solid #d97706;">
+            <div class="stat-icon" style="background-color: #fef3c7; color: #d97706;">📜</div>
             <div class="stat-info">
-                <h4>Platform Transactions</h4>
-                <div class="stat-value" style="color: #1d4ed8;"><%= totalTransactions %></div>
+                <h4>Commissions on Loans Sanctioned</h4>
+                <div class="stat-value" style="color: #b45309; font-size: 1.5rem;"><%= currencyFormat.format(loanCommissions) %></div>
+                <div style="font-size: 0.78rem; color: #b45309; font-weight: 600;"><%= loanCommissionCount %> Loan Disbursal(s)</div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 4px solid #2563eb;">
+            <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">💳</div>
+            <div class="stat-info">
+                <h4>Commissions on Transactions Done</h4>
+                <div class="stat-value" style="color: #1d4ed8; font-size: 1.5rem;"><%= currencyFormat.format(transCommissions) %></div>
+                <div style="font-size: 0.78rem; color: #1d4ed8; font-weight: 600;"><%= transCommissionCount %> Transfer Event(s)</div>
             </div>
         </div>
 
@@ -210,23 +233,17 @@
             <div class="stat-icon" style="background-color: #fefce8; color: #a16207;">📊</div>
             <div class="stat-info">
                 <h4>Gross Transaction Volume</h4>
-                <div class="stat-value" style="color: #a16207; font-size: 1.4rem;"><%= currencyFormat.format(totalVolume) %></div>
+                <div class="stat-value" style="color: #a16207; font-size: 1.35rem;"><%= currencyFormat.format(totalVolume) %></div>
+                <div style="font-size: 0.78rem; color: #64748b;"><%= totalTransactions %> Transacted Entries</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon" style="background-color: #faf5ff; color: #7c3aed;">🏛️</div>
             <div class="stat-info">
-                <h4>Active Partner Banks</h4>
-                <div class="stat-value" style="color: #7c3aed;"><%= totalBanks %></div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: #fff7ed; color: #ea580c;">📈</div>
-            <div class="stat-info">
-                <h4>Avg. Commission Rate</h4>
-                <div class="stat-value" style="color: #ea580c;"><%= avgCommissionRate %>%</div>
+                <h4>Partner Banks & Rates</h4>
+                <div class="stat-value" style="color: #7c3aed;"><%= totalBanks %> Banks</div>
+                <div style="font-size: 0.78rem; color: #7c3aed; font-weight: 600;">Avg. Rate: <%= avgCommissionRate %>%</div>
             </div>
         </div>
     </div>
@@ -234,8 +251,13 @@
     <!-- Partner Banks Commission Revenue Breakdown Table -->
     <div class="card" style="margin-bottom: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">🏛️ Institutional Commission Revenue per Partner Bank</h4>
-            <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 14px;">Manage Bank Rates &rarr;</a>
+            <div>
+                <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">🏛️ Bank-Related Commissions & Institutional Breakdown</h4>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                    Platform revenue generated across partner banks segregated by loan sanctions and customer transactions.
+                </p>
+            </div>
+            <a href="${pageContext.request.contextPath}/admin/banks" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 14px;">Manage Partner Bank Rates &rarr;</a>
         </div>
 
         <div class="table-container">
@@ -244,10 +266,10 @@
                     <tr>
                         <th>Partner Bank</th>
                         <th>Bank Code</th>
-                        <th>Agreed Commission Rate</th>
-                        <th>Active Accounts</th>
-                        <th>Deposits Managed</th>
-                        <th>Commission Transactions</th>
+                        <th>Commission Fee Rate</th>
+                        <th>Accounts & Volume</th>
+                        <th>Loan Sanctions Commission</th>
+                        <th>Transactions Commission</th>
                         <th>Total Platform Commission</th>
                         <th>Status</th>
                     </tr>
@@ -257,15 +279,22 @@
                         for (Map<String, Object> b : bankBreakdown) {
                             BigDecimal bComm = (BigDecimal) b.get("commissionsGenerated");
                             if (bComm == null) bComm = BigDecimal.ZERO;
+                            BigDecimal lComm = (BigDecimal) b.get("loanCommissionsGenerated");
+                            if (lComm == null) lComm = BigDecimal.ZERO;
+                            BigDecimal tComm = bComm.subtract(lComm);
+                            if (tComm.compareTo(BigDecimal.ZERO) < 0) tComm = BigDecimal.ZERO;
                     %>
                         <tr>
                             <td><strong><%= b.get("bankName") %></strong></td>
                             <td><span class="badge" style="background: #f1f5f9; color: #334155;"><%= b.get("bankCode") %></span></td>
                             <td style="font-weight: 700; color: #ea580c;"><%= b.get("commissionRate") %>%</td>
-                            <td><%= b.get("accountCount") %></td>
-                            <td style="color: #64748b;"><%= currencyFormat.format(b.get("totalDeposits")) %></td>
-                            <td><%= b.get("commissionTransCount") %></td>
-                            <td style="font-weight: 800; color: #059669; font-size: 1rem;"><%= currencyFormat.format(bComm) %></td>
+                            <td>
+                                <div><strong><%= b.get("accountCount") %></strong> Accounts</div>
+                                <div style="font-size: 0.78rem; color: #64748b;"><%= currencyFormat.format(b.get("totalDeposits")) %></div>
+                            </td>
+                            <td style="font-weight: 700; color: #b45309;"><%= currencyFormat.format(lComm) %></td>
+                            <td style="font-weight: 700; color: #1d4ed8;"><%= currencyFormat.format(tComm) %></td>
+                            <td style="font-weight: 800; color: #059669; font-size: 1.05rem;"><%= currencyFormat.format(bComm) %></td>
                             <td>
                                 <span class="badge" style="<%= "ACTIVE".equals(b.get("status")) ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;" %>">
                                     <%= b.get("status") %>
@@ -288,7 +317,12 @@
     <!-- Recent Platform Commission Events Table -->
     <div class="card" style="margin-bottom: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">⚡ Recent Platform Commission Events</h4>
+            <div>
+                <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">⚡ Recent Platform Commission Events</h4>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                    Real-time commission fees harvested from loans sanctioned and transfer transactions.
+                </p>
+            </div>
             <a href="${pageContext.request.contextPath}/admin/transactions" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 14px;">Full Ledger &rarr;</a>
         </div>
 
@@ -297,9 +331,9 @@
                 <thead>
                     <tr>
                         <th>Txn Ref #</th>
+                        <th>Revenue Stream</th>
                         <th>Origin Bank</th>
                         <th>Destination Bank</th>
-                        <th>Txn Type</th>
                         <th>Transacted Amount</th>
                         <th>Commission Rate</th>
                         <th>Commission Fee Earned</th>
@@ -309,22 +343,32 @@
                 <tbody>
                     <% if (recentCommissions != null && !recentCommissions.isEmpty()) {
                         for (Map<String, Object> rc : recentCommissions) {
+                            String stype = (String) rc.get("sourceType");
                     %>
                         <tr>
-                            <td><strong><%= rc.get("referenceNumber") %></strong></td>
+                            <td>
+                                <strong><%= rc.get("referenceNumber") %></strong>
+                                <div style="font-size: 0.75rem; color: #64748b;"><%= rc.get("description") != null ? rc.get("description") : "" %></div>
+                            </td>
+                            <td>
+                                <% if ("LOAN_SANCTION".equals(stype)) { %>
+                                    <span class="badge" style="background: #fef3c7; color: #92400e; font-weight: 700;">📜 Loan Sanction</span>
+                                <% } else { %>
+                                    <span class="badge" style="background: #dbeafe; color: #1e40af; font-weight: 700;">💳 Transaction</span>
+                                <% } %>
+                            </td>
                             <td><span class="badge" style="background: #e0f2fe; color: #0369a1;"><%= rc.get("fromBankName") %></span></td>
                             <td><span class="badge" style="background: #f1f5f9; color: #334155;"><%= rc.get("toBankName") %></span></td>
-                            <td><%= rc.get("transactionType") %></td>
                             <td style="font-weight: 600;"><%= currencyFormat.format(rc.get("transactionAmount")) %></td>
                             <td style="color: #ea580c; font-weight: 700;"><%= rc.get("commissionRate") %>%</td>
-                            <td style="font-weight: 800; color: #059669;"><%= currencyFormat.format(rc.get("commissionAmount")) %></td>
+                            <td style="font-weight: 800; color: #059669; font-size: 1rem;"><%= currencyFormat.format(rc.get("commissionAmount")) %></td>
                             <td style="font-size: 0.82rem; color: #64748b;"><%= rc.get("createdAt") %></td>
                         </tr>
                     <%  }
                     } else { %>
                         <tr>
                             <td colspan="8" style="text-align: center; padding: 24px; color: #64748b;">
-                                No commission transactions recorded yet. Commissions are generated automatically when customer transactions occur.
+                                No commission transactions recorded yet. Commissions are generated automatically when loans are disbursed or customer transactions occur.
                             </td>
                         </tr>
                     <% } %>

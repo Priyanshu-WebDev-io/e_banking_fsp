@@ -14,6 +14,7 @@
 
     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
     String createdAcc = request.getParameter("created");
+    String pendingAcc = request.getParameter("pending");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -100,7 +101,11 @@
         </div>
     </div>
 
-    <% if (createdAcc != null) { %>
+    <% if (pendingAcc != null) { %>
+        <div class="alert alert-warning" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+            ⏳ <strong>Account Request Received!</strong> Your application for account <strong>#<%= pendingAcc %></strong> has been received and is <strong>pending confirmation by Bank Administrators</strong>. It will be activated once verified.
+        </div>
+    <% } else if (createdAcc != null) { %>
         <div class="alert alert-success">
             <strong>Success!</strong> Your new bank account <strong>#<%= createdAcc %></strong> has been successfully opened!
         </div>
@@ -159,8 +164,14 @@
                     </span>
                 </div>
                 <div>
-                    <span class="badge badge-<%= status != null ? status.toLowerCase() : "active" %>">
-                        <%= status %>
+                    <%
+                        boolean isPending = "PENDING".equalsIgnoreCase(status);
+                        String badgeStyle = isPending 
+                            ? "background: #fef3c7; color: #92400e;" 
+                            : ("ACTIVE".equalsIgnoreCase(status) ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;");
+                    %>
+                    <span class="badge" style="<%= badgeStyle %> font-weight: 700; padding: 4px 10px; border-radius: 9999px;">
+                        <%= isPending ? "⏳ PENDING BANK APPROVAL" : status %>
                     </span>
                 </div>
             </div>

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +36,7 @@ public class BankAdminCardsServlet extends HttpServlet {
         Integer assignedBankId = (Integer) session.getAttribute("bankAdminBankId");
 
         int totalCards = 0;
+        int pendingCards = 0;
         int activeCards = 0;
         int blockedCards = 0;
 
@@ -44,9 +46,10 @@ public class BankAdminCardsServlet extends HttpServlet {
 
             // 1. Metrics
             StringBuilder metricSql = new StringBuilder("""
-                    SELECT COUNT(*),
+                    SELECT COUNT(c.card_id),
                            COALESCE(SUM(CASE WHEN c.status = 'ACTIVE' THEN 1 ELSE 0 END), 0),
-                           COALESCE(SUM(CASE WHEN c.status = 'BLOCKED' THEN 1 ELSE 0 END), 0)
+                           COALESCE(SUM(CASE WHEN c.status = 'BLOCKED' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN c.status = 'PENDING' THEN 1 ELSE 0 END), 0)
                     FROM cards c
                     JOIN accounts a ON c.account_id = a.account_id
                     WHERE 1=1
@@ -63,6 +66,7 @@ public class BankAdminCardsServlet extends HttpServlet {
                         totalCards = rs.getInt(1);
                         activeCards = rs.getInt(2);
                         blockedCards = rs.getInt(3);
+                        pendingCards = rs.getInt(4);
                     }
                 }
             }
@@ -82,7 +86,7 @@ public class BankAdminCardsServlet extends HttpServlet {
             if (assignedBankId != null) {
                 cardsListSql.append(" AND a.bank_id = ?");
             }
-            cardsListSql.append(" ORDER BY c.created_at DESC");
+            cardsListSql.append(" ORDER BY CASE WHEN c.status = 'PENDING' THEN 0 ELSE 1 END, c.created_at DESC");
 
             try (PreparedStatement ps = con.prepareStatement(cardsListSql.toString())) {
                 if (assignedBankId != null) {
@@ -124,6 +128,7 @@ public class BankAdminCardsServlet extends HttpServlet {
         }
 
         request.setAttribute("totalCards", totalCards);
+        request.setAttribute("pendingCards", pendingCards);
         request.setAttribute("activeCards", activeCards);
         request.setAttribute("blockedCards", blockedCards);
         request.setAttribute("cards", cards);
@@ -144,16 +149,35 @@ public class BankAdminCardsServlet extends HttpServlet {
         String cardIdStr = request.getParameter("cardId");
         String action = request.getParameter("action");
 
-        if ("toggle".equalsIgnoreCase(action) && cardIdStr != null) {
+        if (cardIdStr != null && action != null) {
             try (Connection con = DBConnection.getConnection()) {
                 int cardId = Integer.parseInt(cardIdStr.trim());
-                String sql = "UPDATE cards SET status = CASE WHEN status = 'ACTIVE' THEN 'BLOCKED' ELSE 'ACTIVE' END WHERE card_id = ?";
-                try (PreparedStatement ps = con.prepareStatement(sql)) {
-                    ps.setInt(1, cardId);
-                    ps.executeUpdate();
+
+                if ("confirm".equalsIgnoreCase(action) || "approve".equalsIgnoreCase(action)) {
+                    String sql = "UPDATE cards SET status = 'ACTIVE' WHERE card_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
+                        ps.setInt(1, cardId);
+                        ps.executeUpdate();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/cards?success=card_confirmed");
+                    return;
+                } else if ("reject".equalsIgnoreCase(action)) {
+                    String sql = "UPDATE cards SET status = 'REJECTED' WHERE card_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
+                        ps.setInt(1, cardId);
+                        ps.executeUpdate();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/cards?success=card_rejected");
+                    return;
+                } else if ("toggle".equalsIgnoreCase(action)) {
+                    String sql = "UPDATE cards SET status = CASE WHEN status = 'ACTIVE' THEN 'BLOCKED' ELSE 'ACTIVE' END WHERE card_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
+                        ps.setInt(1, cardId);
+                        ps.executeUpdate();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/cards?success=status_updated");
+                    return;
                 }
-                response.sendRedirect(request.getContextPath() + "/bank-admin/cards?success=status_updated");
-                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/bank-admin/cards?error=" +

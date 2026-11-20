@@ -139,6 +139,7 @@
         <% } %>
 
         <form action="${pageContext.request.contextPath}/bank-admin/login" method="post">
+            <input type="hidden" name="from" value="bank_portal">
             <div class="form-group">
                 <label for="username">Bank Admin Username or Email</label>
                 <input type="text" id="username" name="username" placeholder="e.g. bankadmin@gmail.com or sbi_admin" required autofocus>

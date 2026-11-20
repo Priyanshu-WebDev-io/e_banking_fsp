@@ -315,15 +315,17 @@ public class LoanServlet extends HttpServlet {
             if ("APPROVE".equalsIgnoreCase(decision)) {
                 // Fetch loan details and lock
                 int accountId = 0;
+                int bankId = 0;
                 BigDecimal principal = BigDecimal.ZERO;
                 String appNumber = "";
 
-                String lockSql = "SELECT account_id, principal_amount, application_number FROM loan_applications WHERE loan_id = ? AND status = 'PENDING' FOR UPDATE";
+                String lockSql = "SELECT account_id, bank_id, principal_amount, application_number FROM loan_applications WHERE loan_id = ? AND status = 'PENDING' FOR UPDATE";
                 try (PreparedStatement ps = con.prepareStatement(lockSql)) {
                     ps.setInt(1, loanId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             accountId = rs.getInt("account_id");
+                            bankId = rs.getInt("bank_id");
                             principal = rs.getBigDecimal("principal_amount");
                             appNumber = rs.getString("application_number");
                         } else {
@@ -349,12 +351,50 @@ public class LoanServlet extends HttpServlet {
                         (reference_number, from_account_id, to_account_id, amount, transaction_type, status, description)
                         VALUES (?, NULL, ?, ?, 'DEPOSIT', 'SUCCESS', ?)
                         """;
-                try (PreparedStatement ps = con.prepareStatement(transSql)) {
+                int transId = 0;
+                try (PreparedStatement ps = con.prepareStatement(transSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, refNo);
                     ps.setInt(2, accountId);
                     ps.setBigDecimal(3, principal);
                     ps.setString(4, "Loan Disbursal Credit (Ref: " + appNumber + ")");
                     ps.executeUpdate();
+
+                    try (ResultSet rs = ps.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            transId = rs.getInt(1);
+                        }
+                    }
+                }
+
+                // Record Platform Commission for Loan Sanctioned
+                BigDecimal commRate = new BigDecimal("0.50");
+                if (bankId > 0) {
+                    String rateSql = "SELECT commission_rate FROM banks WHERE bank_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(rateSql)) {
+                        ps.setInt(1, bankId);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                commRate = rs.getBigDecimal("commission_rate");
+                            }
+                        }
+                    }
+                }
+
+                BigDecimal loanCommission = principal.multiply(commRate)
+                        .divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+
+                if (transId > 0 && bankId > 0 && loanCommission.compareTo(BigDecimal.ZERO) > 0) {
+                    String commSql = """
+                            INSERT INTO commissions (bank_id, transaction_id, commission_rate, commission_amount)
+                            VALUES (?, ?, ?, ?)
+                            """;
+                    try (PreparedStatement ps = con.prepareStatement(commSql)) {
+                        ps.setInt(1, bankId);
+                        ps.setInt(2, transId);
+                        ps.setBigDecimal(3, commRate);
+                        ps.setBigDecimal(4, loanCommission);
+                        ps.executeUpdate();
+                    }
                 }
 
                 // Update loan application status to DISBURSED

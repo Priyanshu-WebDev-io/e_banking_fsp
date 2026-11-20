@@ -39,6 +39,9 @@ public class BankAdminAccountsServlet extends HttpServlet {
         String statusFilter = request.getParameter("status");
 
         int totalAccounts = 0;
+        int pendingAccounts = 0;
+        int activeAccounts = 0;
+        int blockedAccounts = 0;
         BigDecimal totalDeposits = BigDecimal.ZERO;
         int savingsCount = 0;
         int currentCount = 0;
@@ -66,7 +69,10 @@ public class BankAdminAccountsServlet extends HttpServlet {
                     SELECT COUNT(*),
                            COALESCE(SUM(balance), 0),
                            COALESCE(SUM(CASE WHEN account_type = 'SAVINGS' THEN 1 ELSE 0 END), 0),
-                           COALESCE(SUM(CASE WHEN account_type = 'CURRENT' THEN 1 ELSE 0 END), 0)
+                           COALESCE(SUM(CASE WHEN account_type = 'CURRENT' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END), 0),
+                           COALESCE(SUM(CASE WHEN status = 'BLOCKED' THEN 1 ELSE 0 END), 0)
                     FROM accounts
                     WHERE 1=1
                     """);
@@ -83,6 +89,9 @@ public class BankAdminAccountsServlet extends HttpServlet {
                         totalDeposits = rs.getBigDecimal(2);
                         savingsCount = rs.getInt(3);
                         currentCount = rs.getInt(4);
+                        pendingAccounts = rs.getInt(5);
+                        activeAccounts = rs.getInt(6);
+                        blockedAccounts = rs.getInt(7);
                     }
                 }
             }
@@ -120,7 +129,7 @@ public class BankAdminAccountsServlet extends HttpServlet {
                 params.add(statusFilter.trim().toUpperCase());
             }
 
-            sql.append(" ORDER BY a.account_id DESC");
+            sql.append(" ORDER BY CASE WHEN a.status = 'PENDING' THEN 0 ELSE 1 END, a.account_id DESC");
 
             try (PreparedStatement ps = con.prepareStatement(sql.toString())) {
                 for (int i = 0; i < params.size(); i++) {
@@ -154,6 +163,9 @@ public class BankAdminAccountsServlet extends HttpServlet {
         }
 
         request.setAttribute("totalAccounts", totalAccounts);
+        request.setAttribute("pendingAccounts", pendingAccounts);
+        request.setAttribute("activeAccounts", activeAccounts);
+        request.setAttribute("blockedAccounts", blockedAccounts);
         request.setAttribute("totalDeposits", totalDeposits != null ? totalDeposits : BigDecimal.ZERO);
         request.setAttribute("savingsCount", savingsCount);
         request.setAttribute("currentCount", currentCount);
@@ -184,12 +196,30 @@ public class BankAdminAccountsServlet extends HttpServlet {
             try (Connection con = DBConnection.getConnection()) {
                 int accountId = Integer.parseInt(accountIdStr.trim());
 
-                if ("toggle_block".equalsIgnoreCase(action)) {
+                if ("confirm".equalsIgnoreCase(action) || "approve".equalsIgnoreCase(action)) {
+                    String sql = "UPDATE accounts SET status = 'ACTIVE' WHERE account_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
+                        ps.setInt(1, accountId);
+                        ps.executeUpdate();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?success=account_confirmed");
+                    return;
+                } else if ("reject".equalsIgnoreCase(action)) {
+                    String sql = "UPDATE accounts SET status = 'REJECTED' WHERE account_id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
+                        ps.setInt(1, accountId);
+                        ps.executeUpdate();
+                    }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?success=account_rejected");
+                    return;
+                } else if ("toggle_block".equalsIgnoreCase(action)) {
                     String sql = "UPDATE accounts SET status = CASE WHEN status = 'ACTIVE' THEN 'BLOCKED' ELSE 'ACTIVE' END WHERE account_id = ?";
                     try (PreparedStatement ps = con.prepareStatement(sql)) {
                         ps.setInt(1, accountId);
                         ps.executeUpdate();
                     }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?success=status_updated");
+                    return;
                 } else if ("set_status".equalsIgnoreCase(action) && newStatus != null) {
                     String sql = "UPDATE accounts SET status = ? WHERE account_id = ?";
                     try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -197,9 +227,9 @@ public class BankAdminAccountsServlet extends HttpServlet {
                         ps.setInt(2, accountId);
                         ps.executeUpdate();
                     }
+                    response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?success=status_updated");
+                    return;
                 }
-                response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?success=status_updated");
-                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/bank-admin/accounts?error=" +
